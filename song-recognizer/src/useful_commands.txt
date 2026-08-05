@@ -1,0 +1,52 @@
+ffmpeg -i reference_songs/song.mp3 \
+       -ac 1 \
+       -ar 16000 \
+       reference_songs/song.wav
+
+
+python src/generate_spectrogram.py \
+    reference_songs/song.wav \
+    --plot plots/song_spectrogram.png \
+    --data database/song_spectrogram.npz
+
+
+python src/detect_peaks.py \
+    database/song_spectrogram.npz \
+    --plot plots/song_landmarks.png \
+    --output database/song_peaks.npz
+
+
+python src/generate_fingerprints.py \
+    database/song_peaks.npz \
+    --output database/song_fingerprints.npz
+
+
+python src/load_fingerprints.py \
+    3 \
+    database/song_fingerprints.npz
+
+python src/record.py \
+    --device plughw:2,0 \
+    --duration 8 \
+    --sample-rate 16000 \
+    --channels 1 \
+    --output recordings/query.wav
+
+python src/generate_spectrogram.py \
+    recordings/query.wav \
+    --plot plots/query_spectrogram.png \
+    --data database/query_spectrogram.npz
+
+
+python src/detect_peaks.py \
+    database/query_spectrogram.npz \
+    --plot plots/query_landmarks.png \
+    --output database/query_peaks.npz
+
+python src/generate_fingerprints.py \
+    database/query_peaks.npz \
+    --output database/query_fingerprints.npz
+
+python src/match_song.py \
+    database/query_fingerprints.npz
+
