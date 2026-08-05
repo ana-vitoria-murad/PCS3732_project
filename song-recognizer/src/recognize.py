@@ -37,8 +37,8 @@ def parse_arguments() -> argparse.Namespace:
 
     parser.add_argument(
         "--device",
-        default="default",
-        help="ALSA device, such as default or plughw:1,0.",
+        default="plughw:2,0",
+        help="ALSA device, such as default or plughw:2,0.",
     )
 
     parser.add_argument(
