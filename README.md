@@ -241,6 +241,11 @@ A taxa de acerto observada nesse conjunto inicial foi de **5/5 músicas identifi
 
 A métrica de confiança exibida pelo protótipo é calculada a partir da relação entre os votos do melhor agrupamento temporal e o total de ocorrências de hashes encontradas. Portanto, ela funciona como um indicador comparativo interno e **não deve ser interpretada como uma probabilidade estatística calibrada de acerto**.
 
+## Evidências em vídeo
+
+- [Vídeo de reconhecimento de “I Think We're Alone Now”](https://drive.google.com/file/d/1WVeXX_BBBwl9FQLqkDflyXSvk02ixFJV/view?usp=drive_link)
+- [Vídeo de reconhecimento de “I Can See You”](https://drive.google.com/file/d/1dMfCgbtVWppEejYeSiKkwlpFuSDm9pZl/view?usp=drive_link)
+
 ---
 
 # Situação Atual dos Requisitos
