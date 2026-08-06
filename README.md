@@ -241,7 +241,7 @@ A métrica de confiança exibida pelo protótipo é calculada a partir da relaç
 # Situação Atual dos Requisitos
 
 | Requisito | Situação atual |
-|:---:|---|
+|---|---|
 | RF01 — Captura pelo microfone | Implementado. |
 | RF02 — Banco de dados local | Implementado. |
 | RF03 — Fingerprints das músicas cadastradas | Implementado. |
