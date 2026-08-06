@@ -215,16 +215,6 @@ python src/recognize.py \
 
 ---
 
-# Próximos Passos
-
-A primeira etapa prática do projeto consiste na configuração da Raspberry Pi e na implementação do módulo de captura de áudio.
-
-Após validar o funcionamento do hardware, será desenvolvido o módulo responsável pelo pré-processamento do sinal. Em seguida, serão implementados os algoritmos de extração de fingerprints, armazenamento das informações em banco de dados e comparação entre o áudio capturado e as músicas cadastradas.
-
-Por fim, todos os módulos serão integrados e submetidos a testes experimentais para avaliar a eficiência do sistema em diferentes condições de utilização.
-
----
-
 # Resultados dos Testes Iniciais
 
 Foram realizados testes de reconhecimento com trechos de aproximadamente oito segundos capturados durante a reprodução das músicas. As cinco músicas cadastradas foram identificadas corretamente.
