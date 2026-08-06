@@ -81,8 +81,8 @@ Caso contrário, o sistema informará que nenhuma música correspondente foi enc
 
 O projeto baseia-se no conceito de **Acoustic Fingerprinting** (Impressão Digital Acústica), uma técnica que permite identificar trechos de áudio de forma rápida e robusta, mesmo na presença de ruído. O algoritmo central pode ser dividido em quatro etapas principais:
 
-1. **Transformada Rápida de Fourier (FFT):** 
-   O áudio bruto (no domínio do tempo) é dividido em pequenos segmentos e submetido a uma Transformada Rápida de Fourier. Esse processo converte o sinal para o domínio da frequência, gerando um espectrograma que mapeia as frequências e suas respectivas amplitudes ao longo do tempo.
+1. **Transformada de Fourier de Curto Termo (STFT):** 
+   O áudio bruto, inicialmente no domínio do tempo, é dividido em janelas curtas e sobrepostas. Em cada janela é calculada uma Transformada Rápida de Fourier, produzindo um espectrograma que representa as frequências e suas amplitudes ao longo do tempo.
 
 2. **Extração de Picos (Mapa de Constelação):** 
    Em vez de analisar todo o espectrograma, o algoritmo divide o sinal em blocos ou zonas de tamanho fixo. Dentro de cada zona, ele identifica os pontos de pico de amplitude (as frequências de maior intensidade sonora). O resultado é uma representação esparsa do áudio, frequentemente chamada de Constellation Map (Mapa de Constelação), que descarta a maior parte do ruído e retém apenas as características mais marcantes da música.
@@ -110,6 +110,7 @@ A Tabela 1 apresenta os requisitos funcionais e não funcionais definidos para a
 | **RF05** | Funcional | O sistema deve comparar os fingerprints capturados com aqueles armazenados no banco de dados. | Executar uma consulta utilizando um trecho de uma música cadastrada e verificar se ocorre correspondência. |
 | **RF06** | Funcional | O sistema deve identificar e apresentar ao usuário o nome da música reconhecida. | Reproduzir uma música cadastrada e verificar se o sistema retorna corretamente seu título. |
 | **RF07** | Funcional | O sistema deve informar quando nenhuma música compatível for encontrada. | Reproduzir uma música inexistente no banco de dados e verificar se o sistema informa que não houve correspondência. |
+| **RF08** | Funcional | O sistema deve disponibilizar uma interface física por meio de botões conectados aos pinos GPIO da Raspberry Pi. | Pressionar o botão de reconhecimento e verificar se o sistema inicia a gravação, processa o trecho e apresenta o resultado automaticamente. |
 | **RNF01** | Não Funcional | O sistema deve operar integralmente de forma offline. | Desconectar a Raspberry Pi da internet e verificar o funcionamento normal do sistema. |
 | **RNF02** | Não Funcional | O reconhecimento deverá ocorrer em até 10 segundos após a captura do áudio. | Medir o tempo entre o término da gravação e a apresentação do resultado. |
 | **RNF03** | Não Funcional | O sistema deverá executar em uma Raspberry Pi 3 utilizando Raspberry Pi OS. | Implantar o software na Raspberry Pi e validar seu funcionamento. |
@@ -120,9 +121,7 @@ A Tabela 1 apresenta os requisitos funcionais e não funcionais definidos para a
 
 # Arquitetura Proposta
 
-Para facilitar o desenvolvimento e manutenção do software, o sistema será dividido em módulos independentes.
-
-Cada módulo será responsável por uma etapa específica do processamento, permitindo que cada componente seja desenvolvido, testado e validado separadamente antes da integração completa do sistema.
+Para facilitar o desenvolvimento e a manutenção do software, o sistema foi dividido em módulos independentes. Cada módulo é responsável por uma etapa específica do processamento, permitindo testes isolados e integração gradual.
 
 ```mermaid
 flowchart LR
@@ -131,24 +130,25 @@ flowchart LR
     MIC[Microfone USB]
 
     subgraph PI["Raspberry Pi 3"]
-        REC[Captura de Áudio]
-        PRE[Pré-processamento]
-        FP[Extração de Fingerprints]
-        DB[(MySQL)]
-        MATCH[Reconhecimento]
+        REC[Captura de áudio]
+        PRE[Pré-processamento e STFT]
+        PEAK[Detecção de picos]
+        FP[Geração de fingerprints]
+        DB[(SQLite)]
+        MATCH[Matching por hashes e offsets]
     end
 
     USER --> MIC
     MIC --> REC
     REC --> PRE
-    PRE --> FP
+    PRE --> PEAK
+    PEAK --> FP
     FP --> MATCH
     DB <--> MATCH
-    MATCH --> RES[Nome da Música]
+    MATCH --> RES[Título, artista e métricas]
 ```
 
-
-A comunicação entre esses módulos permitirá futuras melhorias sem necessidade de reestruturar completamente o sistema, tornando o projeto mais escalável.
+O fluxo de cadastro processa a música completa e armazena seus fingerprints no banco local. No fluxo de reconhecimento, um trecho de aproximadamente oito segundos é capturado pelo microfone, processado da mesma forma e comparado com os hashes cadastrados. Os matches são agrupados pelo identificador da música e pelo deslocamento temporal entre o trecho consultado e a gravação de referência.
 
 ---
 
@@ -169,22 +169,49 @@ As principais tecnologias previstas são:
 
 ## Software
 
-- Python 3
-- Raspberry Pi OS
-- MySQL
-- MySQL Connector/Python
-- Git
-- GitHub
+- Python 3;
+- Raspberry Pi OS;
+- ALSA e `arecord` para captura de áudio;
+- FFmpeg para conversão de MP3 para WAV mono em 16 kHz;
+- NumPy;
+- SciPy;
+- Matplotlib;
+- SQLite;
+- Git;
+- GitHub.
 
 ---
 
-# Resultados Esperados
+# Organização da Implementação
 
-Ao término do projeto espera-se obter um sistema funcional capaz de reconhecer músicas previamente cadastradas utilizando apenas um pequeno trecho de áudio capturado pelo microfone.
+Os principais scripts implementados são:
 
-Também espera-se compreender os principais conceitos envolvidos em sistemas de reconhecimento de padrões, processamento digital de sinais e desenvolvimento para plataformas embarcadas, consolidando os conhecimentos adquiridos ao longo da disciplina.
+| Script | Responsabilidade |
+|---|---|
+| `record.py` | Captura um trecho de áudio pelo microfone e o salva em WAV. |
+| `generate_spectrogram.py` | Realiza o pré-processamento e gera o espectrograma por STFT. |
+| `detect_peaks.py` | Detecta os picos espectrais e produz o mapa de constelação. |
+| `generate_fingerprints.py` | Forma pares de landmarks e gera os hashes acústicos. |
+| `load_fingerprints.py` | Insere fingerprints já processados no SQLite. |
+| `match_song.py` | Consulta hashes, realiza votação por offset e apresenta o melhor resultado. |
+| `add_song.py` | Automatiza conversão, processamento e cadastro de uma nova música. |
+| `recognize.py` | Automatiza gravação, processamento da consulta e execução do matcher. |
 
-Além do funcionamento do sistema, serão avaliados indicadores como precisão do reconhecimento, tempo de resposta e facilidade de expansão do banco de dados.
+## Cadastro de uma música
+
+```bash
+python src/add_song.py caminho/musica.mp3 \
+    --title "Nome da música" \
+    --artist "Nome do artista"
+```
+
+## Reconhecimento pelo microfone
+
+```bash
+python src/recognize.py \
+    --device plughw:2,0 \
+    --duration 8
+```
 
 ---
 
@@ -195,6 +222,54 @@ A primeira etapa prática do projeto consiste na configuração da Raspberry Pi 
 Após validar o funcionamento do hardware, será desenvolvido o módulo responsável pelo pré-processamento do sinal. Em seguida, serão implementados os algoritmos de extração de fingerprints, armazenamento das informações em banco de dados e comparação entre o áudio capturado e as músicas cadastradas.
 
 Por fim, todos os módulos serão integrados e submetidos a testes experimentais para avaliar a eficiência do sistema em diferentes condições de utilização.
+
+---
+
+# Resultados dos Testes Iniciais
+
+Foram realizados testes de reconhecimento com trechos de aproximadamente oito segundos capturados durante a reprodução das músicas. As cinco músicas cadastradas foram identificadas corretamente.
+
+| Música | Resultado | Votos alinhados | Offset estimado | Confiança exibida |
+|---|:---:|---:|---:|---:|
+| I'm a Believer | Correto | 25 | 22,9 s | 35,7% |
+| I Think We're Alone Now | Correto | 3 | 60,5 s | 12,0% |
+| I Can See You | Correto | 31 | 167,9 s | 29,5% |
+| Espresso | Correto | 19 | 20,1 s | 78,0% |
+| One True Love | Correto | 3 | 30,7 s | 3,2% |
+
+A taxa de acerto observada nesse conjunto inicial foi de **5/5 músicas identificadas corretamente**. Entretanto, os valores de votos e confiança variaram de forma significativa. Em especial, `I Think We're Alone Now` e `One True Love` foram reconhecidas com apenas três votos alinhados, indicando menor margem de segurança diante de ruído, reverberação ou alterações na posição do microfone.
+
+A métrica de confiança exibida pelo protótipo é calculada a partir da relação entre os votos do melhor agrupamento temporal e o total de ocorrências de hashes encontradas. Portanto, ela funciona como um indicador comparativo interno e **não deve ser interpretada como uma probabilidade estatística calibrada de acerto**.
+
+---
+
+# Situação Atual dos Requisitos
+
+| Requisito | Situação atual |
+|:---:|---|
+| RF01 — Captura pelo microfone | Implementado. |
+| RF02 — Banco de dados local | Implementado. |
+| RF03 — Fingerprints das músicas cadastradas | Implementado. |
+| RF04 — Fingerprints do trecho capturado | Implementado. |
+| RF05 — Comparação com o banco | Implementado por busca de hashes e votação de offsets. |
+| RF06 — Apresentação da música reconhecida | Implementado com título, artista e métricas. |
+| RF07 — Rejeição de música desconhecida | Não Implementado |
+| RF08 — Interface física por botões GPIO | Planejado. |
+| RNF01 — Operação offline | Atendido pela arquitetura local. |
+| RNF02 — Resultado em até 10 segundos após a captura | Pendente de medição sistemática na Raspberry Pi 3. |
+| RNF03 — Execução na Raspberry Pi 3 | Pendente de validação final integrada no hardware. |
+| RNF04 — Inclusão sem alterar código-fonte | Implementado pelo script `add_song.py`. |
+| RNF05 — Modularidade, documentação e versionamento | Em andamento, com atualização para a segunda release. |
+
+---
+
+# Próximos Passos
+
+1. Ajustar a quantização das frequências e das diferenças de tempo utilizadas nos hashes, buscando maior robustez para gravações pelo microfone;
+2. Calibrar critérios mínimos de votos, margem entre primeiro e segundo colocados e rejeição de músicas desconhecidas;
+3. Repetir cada teste em diferentes posições, volumes e condições de ruído;
+4. Ampliar gradualmente o banco de músicas;
+5. Fazer a interface física do projeto.
 
 ---
 
