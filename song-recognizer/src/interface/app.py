@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import atexit
 
 from flask import (
     Flask,
@@ -149,22 +150,38 @@ def cancel():
 
 
 # Physical GPIO
+gpio_controller = None
+
+
 if os.getenv(
     "MELODY_ENABLE_GPIO",
     "0",
 ) == "1":
 
-    gpio = GPIOController(
-        service
-    )
+    try:
 
-    gpio.start()
+        gpio_controller = GPIOController(
+            service
+        )
 
+        gpio_controller.start()
+
+        atexit.register(
+            gpio_controller.stop
+        )
+
+    except Exception as exc:
+
+        print(
+            "[GPIO] Disabled:",
+            exc,
+        )
 
 if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
         port=5000,
-        debug=True,
+        debug=False,
+        use_reloader=False,
     )

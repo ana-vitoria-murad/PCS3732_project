@@ -43,7 +43,7 @@ class RecognitionService:
 
     def __init__(
         self,
-        device: str = "default",
+        device: str = "plughw:2,0",
         channels: int = 1,
         sample_rate: int = 16000,
     ):
