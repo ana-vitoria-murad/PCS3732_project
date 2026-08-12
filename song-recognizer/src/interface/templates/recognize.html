@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>melody — reconhecer</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/app.css') }}"
+    >
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <a class="brand" href="/">
+        melody <span>★ ♫ •</span>
+    </a>
+
+    <a class="back-link" href="/">
+        Voltar
+    </a>
+
+</header>
+
+
+<main class="recognition-layout">
+
+    <section class="controls-panel">
+
+        <div class="physical-controls">
+
+            <button
+                class="control blue"
+                data-action="start"
+                aria-label="Iniciar ou continuar gravação"
+            ></button>
+
+            <button
+                class="control yellow"
+                data-action="pause"
+                aria-label="Pausar gravação"
+            ></button>
+
+            <button
+                class="control green"
+                data-action="submit"
+                aria-label="Submeter gravação"
+            ></button>
+
+            <button
+                class="control red"
+                data-action="cancel"
+                aria-label="Interromper execução"
+            ></button>
+
+        </div>
+
+
+        <div class="instructions">
+
+            <h2>Instruções</h2>
+
+            <p>
+                <span class="dot blue-dot"></span>
+                Iniciar / continuar gravação
+            </p>
+
+            <p>
+                <span class="dot yellow-dot"></span>
+                Pausar gravação
+            </p>
+
+            <p>
+                <span class="dot green-dot"></span>
+                Submeter gravação
+            </p>
+
+            <p>
+                <span class="dot red-dot"></span>
+                Interromper execução
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <section class="status-panel">
+
+        <span class="status-label">
+            ESTADO ATUAL:
+        </span>
+
+        <div
+            id="current-status"
+            class="current-status status-idle"
+        >
+            aguardando gravação...
+        </div>
+
+    </section>
+
+
+    <section
+        id="result-card"
+        class="result-card hidden"
+    >
+
+        <div
+            id="cover-placeholder"
+            class="cover-placeholder"
+        >
+            ♪
+        </div>
+
+        <img
+            id="cover"
+            class="cover hidden"
+            alt="Capa da música"
+        >
+
+        <div class="result-info">
+
+            <h1 id="song-title">
+                Música
+            </h1>
+
+            <p id="song-artist">
+                Artista
+            </p>
+
+            <div class="match-details">
+
+                <span id="votes"></span>
+                <span id="confidence"></span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <div>
+        <strong>melody</strong>
+
+        <p>
+            Desenvolvido para a disciplina
+            PCS3722 - Laboratório de Processadores.
+        </p>
+    </div>
+
+    <div>
+        <strong>Integrantes:</strong>
+
+        <p>Ana Vitória Abreu Murad</p>
+        <p>Andrey Rocha Reboredo</p>
+        <p>Yasmin Francisquetti</p>
+    </div>
+
+</footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/recognize.js') }}"
+></script>
+
+</body>
+</html>

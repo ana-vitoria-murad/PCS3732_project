@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>melody</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/app.css') }}"
+    >
+</head>
+
+<body>
+
+<header class="topbar">
+    <a class="brand" href="/">
+        melody <span>★ ♫ •</span>
+    </a>
+</header>
+
+<main class="home-layout">
+
+    <section class="hero-copy">
+
+        <h1>
+            Ouviu uma música nova e quer
+            descobrir o nome?
+        </h1>
+
+        <p>
+            Use nosso reconhecimento musical
+            para descobrir qual música está tocando.
+        </p>
+
+        <a
+            class="primary-button"
+            href="/recognize"
+        >
+            Acessar
+        </a>
+
+    </section>
+
+    <section class="hero-image">
+
+        <img
+            src="{{ url_for('static', filename='images/hero.jpg') }}"
+            alt="Discos de música"
+        >
+
+    </section>
+
+</main>
+
+<footer>
+
+    <div>
+        <strong>melody</strong>
+
+        <p>
+            Desenvolvido para a disciplina
+            PCS3722 - Laboratório de Processadores.
+        </p>
+    </div>
+
+    <div>
+        <strong>Integrantes:</strong>
+
+        <p>Ana Vitória Abreu Murad</p>
+        <p>Andrey Rocha Reboredo</p>
+        <p>Yasmin Francisquetti</p>
+    </div>
+
+</footer>
+
+</body>
+</html>
