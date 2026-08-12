@@ -115,7 +115,7 @@ A Tabela 1 apresenta os requisitos funcionais e não funcionais definidos para a
 | **RNF02** | Não Funcional | O reconhecimento deverá ocorrer em até 10 segundos após a captura do áudio. | Medir o tempo entre o término da gravação e a apresentação do resultado. |
 | **RNF03** | Não Funcional | O sistema deverá executar em uma Raspberry Pi 3 utilizando Raspberry Pi OS. | Implantar o software na Raspberry Pi e validar seu funcionamento. |
 | **RNF04** | Não Funcional | O banco de dados deverá permitir a inclusão de novas músicas sem alterações no código-fonte. | Adicionar uma nova música ao banco e verificar seu reconhecimento. |
-| **RNF05** | Não Funcional | O código deverá possuir organização modular, documentação e controle de versão. | Verificar a estrutura do projeto e do repositório GitHub. |
+| **RNF05** | Não Funcional | O sistema deve possuir alta manutenabilidade, apresentando arquitetura modular, baixo acoplamento entre componentes e código devidamente documentado para facilitar diagnósticos, correções e evoluções de funcionalidades. | Análise estática do código para verificar coesão/acoplamento das classes e módulos, inspeção da documentação técnica (comentários/docstrings) e verificação do repositório do projeto. |
 
 ---
 
@@ -260,11 +260,8 @@ A métrica de confiança exibida pelo protótipo é calculada a partir da relaç
 
 # Próximos Passos
 
-1. Ajustar a quantização das frequências e das diferenças de tempo utilizadas nos hashes, buscando maior robustez para gravações pelo microfone;
-2. Calibrar critérios mínimos de votos, margem entre primeiro e segundo colocados e rejeição de músicas desconhecidas;
-3. Repetir cada teste em diferentes posições, volumes e condições de ruído;
-4. Ampliar gradualmente o banco de músicas;
-5. Fazer a interface física do projeto.
+1. Ajustes finais;
+2. Testes automatizados.
 
 ---
 
