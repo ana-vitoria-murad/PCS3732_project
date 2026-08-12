@@ -5,8 +5,8 @@ import threading
 import pigpio
 
 
-BLUE_PIN = 26
-YELLOW_PIN = 20
+BLUE_PIN = 20
+YELLOW_PIN = 26
 GREEN_PIN = 16
 RED_PIN = 21
 
