@@ -149,8 +149,7 @@ function renderState(data) {
         && data.result
     ) {
 
-        const result =
-            data.result;
+        const result = data.result;
 
         resultCard.classList.remove(
             "hidden"
@@ -168,7 +167,13 @@ function renderState(data) {
         confidenceElement.textContent =
             `${result.confidence}% confiança`;
 
+
         if (result.cover_url) {
+
+            console.log(
+                "Cover URL:",
+                result.cover_url
+            );
 
             coverElement.src =
                 result.cover_url;
@@ -183,6 +188,10 @@ function renderState(data) {
 
         } else {
 
+            console.log(
+                "No cover URL received."
+            );
+
             coverElement.classList.add(
                 "hidden"
             );
@@ -191,14 +200,6 @@ function renderState(data) {
                 "hidden"
             );
         }
-
-    } else if (
-        data.state !== "processing"
-    ) {
-
-        resultCard.classList.add(
-            "hidden"
-        );
     }
 }
 

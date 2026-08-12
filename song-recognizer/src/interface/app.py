@@ -57,31 +57,19 @@ def public_state():
 
     if result:
 
-        slug = slugify(
-            result["title"]
+        cover_file = result.get(
+            "cover_file"
         )
 
-        cover_filename = (
-            f"{slug}.jpg"
-        )
-
-        cover_path = (
-            app.static_folder
-            + "/covers/"
-            + cover_filename
-        )
-
-        if os.path.exists(cover_path):
+        if cover_file:
 
             result["cover_url"] = url_for(
                 "static",
-                filename=(
-                    f"covers/"
-                    f"{cover_filename}"
-                ),
+                filename=f"covers/{cover_file}",
             )
 
         else:
+
             result["cover_url"] = None
 
     return data

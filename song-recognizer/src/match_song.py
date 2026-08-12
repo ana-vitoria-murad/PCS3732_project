@@ -70,7 +70,6 @@ def get_song_info(
 ):
 
     conn = sqlite3.connect(db_path)
-
     cur = conn.cursor()
 
     cur.execute(
