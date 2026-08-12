@@ -166,13 +166,12 @@ class RecognitionService:
         segment_number = len(self._segments)
 
         segment_path = (
-            RECORDINGS_DIR /
-            f"query_segment_{segment_number}.wav"
+            RECORDINGS_DIR
+            / f"query_segment_{segment_number}.wav"
         )
 
         command = [
             "arecord",
-            "-q",
             "-D",
             self.device,
             "-t",
@@ -186,27 +185,112 @@ class RecognitionService:
             str(segment_path),
         ]
 
-        self._process = subprocess.Popen(command)
+        print()
+        print("[AUDIO] Starting recording")
+        print(f"[AUDIO] Device:   {self.device}")
+        print(f"[AUDIO] Channels: {self.channels}")
+        print(f"[AUDIO] Rate:     {self.sample_rate}")
+        print(f"[AUDIO] Output:   {segment_path}")
+        print(
+            "[AUDIO] Command:",
+            " ".join(command),
+        )
 
-        self._segments.append(segment_path)
+        self._process = subprocess.Popen(
+            command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        # Give arecord a moment to initialize.
+        time.sleep(0.3)
+
+        # If the process already exited, recording failed.
+        if self._process.poll() is not None:
+
+            stderr = (
+                self._process.stderr.read()
+                if self._process.stderr
+                else ""
+            )
+
+            self._process = None
+
+            raise RuntimeError(
+                "arecord failed to start:\n"
+                + stderr.strip()
+            )
+
+        self._segments.append(
+            segment_path
+        )
+
+        print(
+            f"[AUDIO] Recording started "
+            f"(PID {self._process.pid})"
+        )
 
     def _stop_current_segment(self):
 
         if self._process is None:
             return
 
+        print(
+            f"[AUDIO] Stopping recording "
+            f"(PID {self._process.pid})..."
+        )
+
         if self._process.poll() is None:
 
-            self._process.send_signal(signal.SIGINT)
+            self._process.send_signal(
+                signal.SIGINT
+            )
 
             try:
-                self._process.wait(timeout=3)
+                self._process.wait(
+                    timeout=3
+                )
 
             except subprocess.TimeoutExpired:
+
+                print(
+                    "[AUDIO] arecord did not stop "
+                    "after SIGINT. Terminating..."
+                )
+
                 self._process.terminate()
-                self._process.wait(timeout=2)
+
+                self._process.wait(
+                    timeout=2
+                )
 
         self._process = None
+
+        if self._segments:
+
+            latest = self._segments[-1]
+
+            if latest.exists():
+
+                size = latest.stat().st_size
+
+                print(
+                    f"[AUDIO] Recording saved: "
+                    f"{latest}"
+                )
+
+                print(
+                    f"[AUDIO] File size: "
+                    f"{size / 1024:.1f} KB"
+                )
+
+            else:
+
+                print(
+                    "[AUDIO] WARNING: "
+                    "recording file was not created!"
+                )
 
     def _clear_session(self):
 
