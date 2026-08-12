@@ -1,17 +1,10 @@
 from __future__ import annotations
 
-import shutil
-import signal
-import sqlite3
 import subprocess
 import sys
 import threading
-import wave
 from enum import Enum
 from pathlib import Path
-import time
-
-import numpy as np
 
 from src.match_song import (
     get_song_info,
@@ -29,11 +22,13 @@ PLOTS_DIR = PROJECT_ROOT / "plots"
 
 DATABASE_PATH = DATABASE_DIR / "songs.db"
 
+RECORDING_DURATION = 8
+
 
 class State(str, Enum):
     IDLE = "idle"
     RECORDING = "recording"
-    PAUSED = "paused"
+    READY = "ready"
     PROCESSING = "processing"
     MATCHED = "matched"
     NO_MATCH = "no_match"
@@ -44,322 +39,220 @@ class RecognitionService:
 
     def __init__(
         self,
-        device: str = "plughw:2,0",
-        channels: int = 1,
-        sample_rate: int = 16000,
+        device="default",
+        channels=1,
+        sample_rate=16000,
     ):
+
         self.device = device
         self.channels = channels
         self.sample_rate = sample_rate
 
         self.state = State.IDLE
-
         self.result = None
         self.error = None
 
-        self._process = None
-        self._segments: list[Path] = []
-
         self._lock = threading.RLock()
 
-        RECORDINGS_DIR.mkdir(exist_ok=True)
-        DATABASE_DIR.mkdir(exist_ok=True)
-        PLOTS_DIR.mkdir(exist_ok=True)
+        RECORDINGS_DIR.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-    # -------------------------------------------------------
-    # PUBLIC STATE
-    # -------------------------------------------------------
+        DATABASE_DIR.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        PLOTS_DIR.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+    # --------------------------------------------------
+    # STATE
+    # --------------------------------------------------
 
     def get_state(self):
+
         with self._lock:
+
             return {
                 "state": self.state.value,
                 "result": self.result,
                 "error": self.error,
             }
 
-    # -------------------------------------------------------
-    # RECORDING
-    # -------------------------------------------------------
+    # --------------------------------------------------
+    # RECORD
+    # --------------------------------------------------
 
     def start_or_resume(self):
 
         with self._lock:
 
-            if self.state == State.PROCESSING:
-                raise RuntimeError(
-                    "Recognition is currently processing."
-                )
-
             if self.state in {
-                State.IDLE,
-                State.MATCHED,
-                State.NO_MATCH,
-                State.ERROR,
+                State.RECORDING,
+                State.PROCESSING,
             }:
-                self._clear_session()
-
-            if self.state == State.RECORDING:
                 return
 
-            self._start_segment()
+            self.result = None
+            self.error = None
 
             self.state = State.RECORDING
-            self.error = None
+
+        print()
+        print("[AUDIO] Starting 8-second recording...")
+
+        thread = threading.Thread(
+            target=self._record,
+            daemon=True,
+        )
+
+        thread.start()
+
+    def _record(self):
+
+        query_wav = (
+            RECORDINGS_DIR / "query.wav"
+        )
+
+        try:
+
+            query_wav.unlink(
+                missing_ok=True
+            )
+
+            command = [
+                sys.executable,
+                str(SRC_DIR / "record.py"),
+                "--device",
+                self.device,
+                "--duration",
+                str(RECORDING_DURATION),
+                "--sample-rate",
+                str(self.sample_rate),
+                "--channels",
+                str(self.channels),
+                "--output",
+                str(query_wav),
+            ]
+
+            print(
+                "[AUDIO] Command:",
+                " ".join(command),
+            )
+
+            subprocess.run(
+                command,
+                cwd=PROJECT_ROOT,
+                check=True,
+            )
+
+            if not query_wav.exists():
+                raise RuntimeError(
+                    "Recording file was not created."
+                )
+
+            print()
+            print("[AUDIO] Recording complete.")
+            print(
+                f"[AUDIO] File: {query_wav}"
+            )
+
+            print(
+                f"[AUDIO] Size: "
+                f"{query_wav.stat().st_size / 1024:.1f} KB"
+            )
+
+            with self._lock:
+                self.state = State.READY
+
+        except Exception as exc:
+
+            print(
+                "[AUDIO] Recording failed:",
+                exc,
+            )
+
+            with self._lock:
+                self.state = State.ERROR
+                self.error = str(exc)
+
+    # --------------------------------------------------
+    # PAUSE
+    # --------------------------------------------------
 
     def pause(self):
 
-        with self._lock:
+        print(
+            "[AUDIO] Pause ignored: "
+            "recording has a fixed duration of 8 seconds."
+        )
 
-            if self.state != State.RECORDING:
-                return
-
-            self._stop_current_segment()
-
-            self.state = State.PAUSED
+    # --------------------------------------------------
+    # CANCEL / RESET
+    # --------------------------------------------------
 
     def cancel(self):
 
         with self._lock:
 
-            if self._process is not None:
-                self._stop_current_segment()
+            if self.state == State.RECORDING:
+                print(
+                    "[AUDIO] Recording cannot be cancelled "
+                    "during the fixed 8-second capture."
+                )
 
-            self._clear_session()
+                return
 
+            self.result = None
+            self.error = None
             self.state = State.IDLE
+
+        print("[AUDIO] Session reset.")
+
+    # --------------------------------------------------
+    # SUBMIT
+    # --------------------------------------------------
 
     def submit(self):
 
         with self._lock:
 
-            if self.state not in {
-                State.RECORDING,
-                State.PAUSED,
-            }:
-                raise RuntimeError(
-                    "There is no recording to submit."
+            if self.state != State.READY:
+
+                print(
+                    "[AUDIO] Cannot submit. "
+                    "Wait for the 8-second recording to finish."
                 )
 
-            if self.state == State.RECORDING:
-                self._stop_current_segment()
-
-            if not self._segments:
-                raise RuntimeError(
-                    "No audio was recorded."
-                )
+                return
 
             self.state = State.PROCESSING
 
-        worker = threading.Thread(
+        print()
+        print("[MATCH] Processing recording...")
+
+        thread = threading.Thread(
             target=self._process_recording,
             daemon=True,
         )
 
-        worker.start()
+        thread.start()
 
-    # -------------------------------------------------------
-    # INTERNAL RECORDING
-    # -------------------------------------------------------
-
-    def _start_segment(self):
-
-        segment_number = len(self._segments)
-
-        segment_path = (
-            RECORDINGS_DIR
-            / f"query_segment_{segment_number}.wav"
-        )
-
-        command = [
-            "arecord",
-            "-D",
-            self.device,
-            "-t",
-            "wav",
-            "-f",
-            "S16_LE",
-            "-r",
-            str(self.sample_rate),
-            "-c",
-            str(self.channels),
-            str(segment_path),
-        ]
-
-        print()
-        print("[AUDIO] Starting recording")
-        print(f"[AUDIO] Device:   {self.device}")
-        print(f"[AUDIO] Channels: {self.channels}")
-        print(f"[AUDIO] Rate:     {self.sample_rate}")
-        print(f"[AUDIO] Output:   {segment_path}")
-        print(
-            "[AUDIO] Command:",
-            " ".join(command),
-        )
-
-        self._process = subprocess.Popen(
-            command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-
-        # Give arecord a moment to initialize.
-        time.sleep(0.3)
-
-        # If the process already exited, recording failed.
-        if self._process.poll() is not None:
-
-            stderr = (
-                self._process.stderr.read()
-                if self._process.stderr
-                else ""
-            )
-
-            self._process = None
-
-            raise RuntimeError(
-                "arecord failed to start:\n"
-                + stderr.strip()
-            )
-
-        self._segments.append(
-            segment_path
-        )
-
-        print(
-            f"[AUDIO] Recording started "
-            f"(PID {self._process.pid})"
-        )
-
-    def _stop_current_segment(self):
-
-        if self._process is None:
-            return
-
-        print(
-            f"[AUDIO] Stopping recording "
-            f"(PID {self._process.pid})..."
-        )
-
-        if self._process.poll() is None:
-
-            self._process.send_signal(
-                signal.SIGINT
-            )
-
-            try:
-                self._process.wait(
-                    timeout=3
-                )
-
-            except subprocess.TimeoutExpired:
-
-                print(
-                    "[AUDIO] arecord did not stop "
-                    "after SIGINT. Terminating..."
-                )
-
-                self._process.terminate()
-
-                self._process.wait(
-                    timeout=2
-                )
-
-        self._process = None
-
-        if self._segments:
-
-            latest = self._segments[-1]
-
-            if latest.exists():
-
-                size = latest.stat().st_size
-
-                print(
-                    f"[AUDIO] Recording saved: "
-                    f"{latest}"
-                )
-
-                print(
-                    f"[AUDIO] File size: "
-                    f"{size / 1024:.1f} KB"
-                )
-
-            else:
-
-                print(
-                    "[AUDIO] WARNING: "
-                    "recording file was not created!"
-                )
-
-    def _clear_session(self):
-
-        self.result = None
-        self.error = None
-
-        for segment in self._segments:
-            segment.unlink(missing_ok=True)
-
-        self._segments.clear()
-
-    # -------------------------------------------------------
-    # AUDIO MERGING
-    # -------------------------------------------------------
-
-    def _merge_segments(self, output: Path):
-
-        if len(self._segments) == 1:
-            shutil.copyfile(
-                self._segments[0],
-                output,
-            )
-            return
-
-        with wave.open(
-            str(self._segments[0]),
-            "rb",
-        ) as first:
-
-            parameters = first.getparams()
-
-        with wave.open(
-            str(output),
-            "wb",
-        ) as destination:
-
-            destination.setparams(parameters)
-
-            for segment in self._segments:
-
-                with wave.open(
-                    str(segment),
-                    "rb",
-                ) as source:
-
-                    if (
-                        source.getnchannels()
-                        != parameters.nchannels
-                        or source.getframerate()
-                        != parameters.framerate
-                        or source.getsampwidth()
-                        != parameters.sampwidth
-                    ):
-                        raise RuntimeError(
-                            "Recorded segments have incompatible formats."
-                        )
-
-                    destination.writeframes(
-                        source.readframes(
-                            source.getnframes()
-                        )
-                    )
-
-    # -------------------------------------------------------
-    # RECOGNITION PIPELINE
-    # -------------------------------------------------------
+    # --------------------------------------------------
+    # PROCESSING
+    # --------------------------------------------------
 
     def _run(self, command):
+
+        print()
+        print(
+            "[PIPELINE]",
+            " ".join(command),
+        )
 
         subprocess.run(
             command,
@@ -372,7 +265,8 @@ class RecognitionService:
         try:
 
             query_wav = (
-                RECORDINGS_DIR / "query.wav"
+                RECORDINGS_DIR /
+                "query.wav"
             )
 
             spectrogram = (
@@ -390,10 +284,7 @@ class RecognitionService:
                 "query_fingerprints.npz"
             )
 
-            self._merge_segments(query_wav)
-
             # Spectrogram
-
             self._run([
                 sys.executable,
                 str(
@@ -411,7 +302,6 @@ class RecognitionService:
             ])
 
             # Peaks
-
             self._run([
                 sys.executable,
                 str(
@@ -429,7 +319,6 @@ class RecognitionService:
             ])
 
             # Fingerprints
-
             self._run([
                 sys.executable,
                 str(
@@ -448,24 +337,41 @@ class RecognitionService:
             with self._lock:
 
                 if result is None:
-                    self.state = State.NO_MATCH
+
+                    self.state = (
+                        State.NO_MATCH
+                    )
+
                     self.result = None
+
                 else:
-                    self.state = State.MATCHED
+
+                    self.state = (
+                        State.MATCHED
+                    )
+
                     self.result = result
 
         except Exception as exc:
+
+            print(
+                "[MATCH] Processing failed:",
+                exc,
+            )
 
             with self._lock:
 
                 self.state = State.ERROR
                 self.error = str(exc)
 
-    # -------------------------------------------------------
-    # MATCHER
-    # -------------------------------------------------------
+    # --------------------------------------------------
+    # MATCHING
+    # --------------------------------------------------
 
-    def _match(self, fingerprint_path):
+    def _match(
+        self,
+        fingerprint_path,
+    ):
 
         hashes, query_times = (
             load_query_fingerprints(
@@ -473,10 +379,12 @@ class RecognitionService:
             )
         )
 
-        votes, total_hits = lookup_matches(
-            DATABASE_PATH,
-            hashes,
-            query_times,
+        votes, total_hits = (
+            lookup_matches(
+                DATABASE_PATH,
+                hashes,
+                query_times,
+            )
         )
 
         if not votes:
@@ -485,7 +393,9 @@ class RecognitionService:
         (
             best_song_id,
             best_offset,
-        ), best_votes = votes.most_common(1)[0]
+        ), best_votes = (
+            votes.most_common(1)[0]
+        )
 
         song = get_song_info(
             DATABASE_PATH,
@@ -517,4 +427,3 @@ class RecognitionService:
                 1,
             ),
         }
-

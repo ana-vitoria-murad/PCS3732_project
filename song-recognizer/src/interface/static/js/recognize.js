@@ -75,6 +75,10 @@ const statuses = {
         text: "erro durante a execução.",
         className: "status-error",
     },
+    ready: {
+        text: "gravação concluída — pressione verde para identificar",
+        className: "status-processing",
+    },
 };
 
 
