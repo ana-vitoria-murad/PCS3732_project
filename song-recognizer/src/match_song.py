@@ -75,7 +75,11 @@ def get_song_info(
 
     cur.execute(
         """
-        SELECT title, artist
+        SELECT
+            title,
+            artist,
+            album,
+            cover_file
         FROM songs
         WHERE id = ?
         """,

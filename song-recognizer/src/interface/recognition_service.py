@@ -405,7 +405,7 @@ class RecognitionService:
         if song is None:
             return None
 
-        title, artist = song
+        title, artist, album, cover_file = song
 
         confidence = (
             100.0
@@ -417,6 +417,8 @@ class RecognitionService:
             "song_id": best_song_id,
             "title": title,
             "artist": artist,
+            "album": album,
+            "cover_file": cover_file,
             "votes": best_votes,
             "offset": round(
                 float(best_offset),

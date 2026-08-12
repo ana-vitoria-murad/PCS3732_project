@@ -10,6 +10,7 @@ import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+import shutil
 
 import numpy as np
 
@@ -21,6 +22,13 @@ REFERENCE_DIR = PROJECT_ROOT / "reference_songs"
 PLOTS_DIR = PROJECT_ROOT / "plots"
 
 DEFAULT_DATABASE = DATABASE_DIR / "songs.db"
+COVERS_DIR = (
+    PROJECT_ROOT
+    / "src"
+    / "interface"
+    / "static"
+    / "covers"
+)
 
 
 def slugify(text: str) -> str:
@@ -47,7 +55,9 @@ def create_database_schema(connection: sqlite3.Connection) -> None:
         CREATE TABLE IF NOT EXISTS songs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            artist TEXT NOT NULL
+            artist TEXT NOT NULL,
+            album TEXT,
+            cover_file TEXT
         );
 
         CREATE TABLE IF NOT EXISTS fingerprints (
@@ -145,9 +155,11 @@ def insert_song(
     database_path: Path,
     title: str,
     artist: str,
+    album: str | None,
+    cover_file: str | None,
     fingerprints_path: Path,
     replace: bool,
-) -> tuple[int, int]:
+):
     """Insert song metadata and fingerprints into SQLite."""
 
     with np.load(fingerprints_path) as data:
@@ -193,10 +205,20 @@ def insert_song(
 
         cursor = connection.execute(
             """
-            INSERT INTO songs(title, artist)
-            VALUES (?, ?)
+            INSERT INTO songs(
+                title,
+                artist,
+                album,
+                cover_file
+            )
+            VALUES (?, ?, ?, ?)
             """,
-            (title, artist),
+            (
+                title,
+                artist,
+                album,
+                cover_file,
+            ),
         )
 
         song_id = int(cursor.lastrowid)
@@ -257,6 +279,19 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--album",
+        default=None,
+        help="Album name.",
+    )
+
+    parser.add_argument(
+        "--cover",
+        type=Path,
+        default=None,
+        help="Local cover image file.",
+    )
+
+    parser.add_argument(
         "--database",
         type=Path,
         default=DEFAULT_DATABASE,
@@ -270,6 +305,55 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
+def save_cover(
+    source: Path | None,
+    slug: str,
+) -> str | None:
+
+    if source is None:
+        return None
+
+    source = source.expanduser().resolve()
+
+    if not source.exists():
+        raise FileNotFoundError(
+            f"Cover image not found: {source}"
+        )
+
+    allowed_extensions = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+    }
+
+    extension = source.suffix.lower()
+
+    if extension not in allowed_extensions:
+        raise ValueError(
+            "Cover must be JPG, PNG or WEBP."
+        )
+
+    COVERS_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    filename = (
+        f"{slug}{extension}"
+    )
+
+    destination = (
+        COVERS_DIR / filename
+    )
+
+    shutil.copy2(
+        source,
+        destination,
+    )
+
+    return filename
 
 
 def main() -> None:
@@ -309,10 +393,17 @@ def main() -> None:
         slug=slug,
     )
 
+    cover_file = save_cover(
+        source=args.cover,
+        slug=slug,
+    )
+
     song_id, fingerprint_count = insert_song(
         database_path=database_path,
         title=args.title,
         artist=args.artist,
+        album=args.album,
+        cover_file=cover_file,
         fingerprints_path=fingerprints_path,
         replace=args.replace,
     )
