@@ -242,6 +242,11 @@ A métrica de confiança exibida pelo protótipo é calculada a partir da relaç
 
 Nas últimas duas semanas de projeto, foi implementada a interface visual do projeto. A prototipação foi feita através da ferramenta Figma e em seguida implementada em HTML, .css e JavaScript. Foram feitas duas telas, uma como inicial, com informações sobre o projeto e a outra com a implementação da funcionalidade de reconhecimento musical. O protótipo das telas pode ser encontrado [nesse link](https://drive.google.com/drive/folders/1QI7yXe-QciUxqszAPm3iOHteYk10QRbw?usp=sharing).
 
+## Evidências em vídeo
+
+- [Vídeo do reconhecimento na Interface Visual de "Faint”](https://drive.google.com/file/d/1rLpTn6fKmtMdpTGRO0p9CcuUjlkBJj4Z/view?usp=sharing)
+- [Vídeo do reconhecimento na Interface Visual de “I'm a believer”](https://drive.google.com/file/d/1J5bIVzYEBFFINbpdiOmMa_muk8vZdySW/view?usp=sharing)
+
 ---
 
 # Situação Atual dos Requisitos
