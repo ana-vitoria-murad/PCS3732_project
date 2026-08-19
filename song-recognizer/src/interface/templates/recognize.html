@@ -17,7 +17,7 @@
     >
 </head>
 
-<body>
+<body class="recognition-page">
 
 <header class="topbar">
 
@@ -48,6 +48,14 @@
             ></button>
 
             <button
+                class="control yellow"
+                type="button"
+                aria-label="Pausar gravação (desativado)"
+                title="Pausa desativada"
+                disabled
+            ></button>
+
+            <button
                 class="control green"
                 data-action="submit"
                 aria-label="Submeter gravação"
@@ -62,26 +70,35 @@
         </div>
 
 
-        <div class="instructions">
+        <details class="instructions">
 
-            <h2>Instruções</h2>
+            <summary>Instruções</summary>
 
-            <p>
-                <span class="dot blue-dot"></span>
-                Iniciar gravação
-            </p>
+            <div class="instructions-list">
 
-            <p>
-                <span class="dot green-dot"></span>
-                Submeter gravação
-            </p>
+                <p>
+                    <span class="dot blue-dot"></span>
+                    Iniciar gravação
+                </p>
 
-            <p>
-                <span class="dot red-dot"></span>
-                Interromper execução
-            </p>
+                <p>
+                    <span class="dot yellow-dot"></span>
+                    Pausa desativada
+                </p>
 
-        </div>
+                <p>
+                    <span class="dot green-dot"></span>
+                    Submeter gravação
+                </p>
+
+                <p>
+                    <span class="dot red-dot"></span>
+                    Interromper execução
+                </p>
+
+            </div>
+
+        </details>
 
     </section>
 
