@@ -213,6 +213,47 @@ python src/recognize.py \
     --duration 8
 ```
 
+## Testes automatizados
+
+Os testes usam os arquivos WAV de referência e o banco de fingerprints já
+existentes. Eles não acessam o microfone e não alteram os arquivos de consulta,
+o banco de dados ou os gráficos do projeto.
+
+Execute a suíte rápida a partir da pasta `song-recognizer`:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+A suíte verifica o reconhecimento das onze músicas, o pré-processamento de
+silêncio, a repetibilidade do ruído sintético e o cancelamento imediato de um
+subprocesso. O teste de rejeição de áudio desconhecido está marcado como falha
+esperada enquanto o critério mínimo de aceitação de matches não for
+implementado.
+
+Para uma avaliação mais ampla, execute o benchmark:
+
+```bash
+python -m tests.benchmark_recognition
+```
+
+Por padrão, ele cria 99 casos: onze músicas, três posições por música e três
+condições (`clean`, `noise` e `echo`). O comando também relata o comportamento
+com ruído e tons sintéticos desconhecidos. Para fazer o benchmark encerrar com
+erro quando houver falsos positivos nesses casos, use:
+
+```bash
+python -m tests.benchmark_recognition --strict-unknown
+```
+
+Resultados detalhados podem ser exportados sem alterar os artefatos de
+produção:
+
+```bash
+python -m tests.benchmark_recognition \
+    --json-output benchmark-results.json
+```
+
 ---
 
 # Resultados dos Testes Iniciais
