@@ -137,7 +137,7 @@ body {
 /* RECOGNITION */
 
 .recognition-layout {
-    width: 92%;
+    width: 90%;
     max-width: 1500px;
 
     flex: 1;
@@ -152,13 +152,12 @@ body {
     grid-template-rows:
         auto 1fr;
 
-    column-gap: 2rem;
-    row-gap: 1.25rem;
+    gap: 3rem;
 }
 
 .controls-panel {
     display: flex;
-    gap: 1.5rem;
+    gap: 4rem;
     align-items: center;
 }
 
@@ -300,20 +299,20 @@ body {
 /* STATUS */
 
 .status-panel {
-    padding-top: 0.5rem;
+    padding-top: 10px;
 }
 
 .status-label {
     display: block;
 
-    font-size: 1.65rem;
+    font-size: 2rem;
     font-weight: 900;
 }
 
 .current-status {
-    margin-top: 0.4rem;
+    margin-top: 10px;
 
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     font-weight: 700;
 }
 
@@ -346,17 +345,17 @@ body {
     display: flex;
     align-items: center;
 
-    gap: 2rem;
+    gap: 4rem;
 
-    min-height: 210px;
+    min-height: 300px;
 
-    padding-bottom: 0.75rem;
+    padding-bottom: 2rem;
 }
 
 .cover,
 .cover-placeholder {
-    width: 190px;
-    height: 190px;
+    width: 255px;
+    height: 255px;
 
     border-radius: 18px;
 
@@ -372,27 +371,27 @@ body {
     align-items: center;
     justify-content: center;
 
-    font-size: 4.5rem;
+    font-size: 6rem;
 }
 
 .result-info h1 {
     margin: 0;
 
     font-size: clamp(
-        2.2rem,
-        4vw,
-        3.75rem
+        2.6rem,
+        5vw,
+        5rem
     );
 
     line-height: 1;
 }
 
 .result-info p {
-    margin: 0.65rem 0;
+    margin: 1rem 0;
 
     color: var(--gray);
 
-    font-size: 1.35rem;
+    font-size: 1.6rem;
 }
 
 .match-details {
@@ -429,16 +428,8 @@ footer p {
         0.65rem 0;
 }
 
-.recognition-page .topbar {
-    height: 88px;
-}
-
 .recognition-page footer {
-    margin: 1rem auto;
-}
-
-.recognition-page footer p {
-    margin: 0.35rem 0;
+    margin-top: 0.75rem;
 }
 
 
@@ -465,7 +456,7 @@ footer p {
     .result-card {
         grid-column: 1;
 
-        gap: 1.25rem;
+        gap: 2rem;
     }
 
     .instructions-list {
