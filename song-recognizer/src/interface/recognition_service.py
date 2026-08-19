@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
 import sys
 import threading
@@ -23,6 +25,10 @@ PLOTS_DIR = PROJECT_ROOT / "plots"
 DATABASE_PATH = DATABASE_DIR / "songs.db"
 
 RECORDING_DURATION = 8
+
+
+class ExecutionCancelled(Exception):
+    """Raised internally when the current recognition run is cancelled."""
 
 
 class State(str, Enum):
@@ -53,6 +59,8 @@ class RecognitionService:
         self.error = None
 
         self._lock = threading.RLock()
+        self._run_id = 0
+        self._active_process = None
 
         RECORDINGS_DIR.mkdir(
             parents=True,
@@ -100,6 +108,8 @@ class RecognitionService:
             self.result = None
             self.error = None
 
+            self._run_id += 1
+            run_id = self._run_id
             self.state = State.RECORDING
 
         print()
@@ -107,12 +117,13 @@ class RecognitionService:
 
         thread = threading.Thread(
             target=self._record,
+            args=(run_id,),
             daemon=True,
         )
 
         thread.start()
 
-    def _record(self):
+    def _record(self, run_id):
 
         query_wav = (
             RECORDINGS_DIR / "query.wav"
@@ -120,9 +131,13 @@ class RecognitionService:
 
         try:
 
-            query_wav.unlink(
-                missing_ok=True
-            )
+            with self._lock:
+
+                self._ensure_current(run_id)
+
+                query_wav.unlink(
+                    missing_ok=True
+                )
 
             command = [
                 sys.executable,
@@ -144,11 +159,12 @@ class RecognitionService:
                 " ".join(command),
             )
 
-            subprocess.run(
+            self._run(
                 command,
-                cwd=PROJECT_ROOT,
-                check=True,
+                run_id,
             )
+
+            self._ensure_current(run_id)
 
             if not query_wav.exists():
                 raise RuntimeError(
@@ -167,7 +183,12 @@ class RecognitionService:
             )
 
             with self._lock:
+                self._ensure_current(run_id)
                 self.state = State.READY
+
+        except ExecutionCancelled:
+
+            print("[AUDIO] Recording cancelled.")
 
         except Exception as exc:
 
@@ -177,19 +198,12 @@ class RecognitionService:
             )
 
             with self._lock:
+
+                if run_id != self._run_id:
+                    return
+
                 self.state = State.ERROR
                 self.error = str(exc)
-
-    # --------------------------------------------------
-    # PAUSE
-    # --------------------------------------------------
-
-    def pause(self):
-
-        print(
-            "[AUDIO] Pause ignored: "
-            "recording has a fixed duration of 8 seconds."
-        )
 
     # --------------------------------------------------
     # CANCEL / RESET
@@ -199,19 +213,17 @@ class RecognitionService:
 
         with self._lock:
 
-            if self.state == State.RECORDING:
-                print(
-                    "[AUDIO] Recording cannot be cancelled "
-                    "during the fixed 8-second capture."
-                )
-
-                return
-
+            self._run_id += 1
             self.result = None
             self.error = None
             self.state = State.IDLE
 
-        print("[AUDIO] Session reset.")
+            process = self._active_process
+
+            if process is not None:
+                self._stop_process(process)
+
+        print("[AUDIO] Execution interrupted and session reset.")
 
     # --------------------------------------------------
     # SUBMIT
@@ -231,12 +243,14 @@ class RecognitionService:
                 return
 
             self.state = State.PROCESSING
+            run_id = self._run_id
 
         print()
         print("[MATCH] Processing recording...")
 
         thread = threading.Thread(
             target=self._process_recording,
+            args=(run_id,),
             daemon=True,
         )
 
@@ -246,7 +260,44 @@ class RecognitionService:
     # PROCESSING
     # --------------------------------------------------
 
-    def _run(self, command):
+    def _ensure_current(self, run_id):
+
+        with self._lock:
+
+            if run_id != self._run_id:
+                raise ExecutionCancelled
+
+    def _is_cancelled(self, run_id):
+
+        with self._lock:
+            return run_id != self._run_id
+
+    @staticmethod
+    def _stop_process(process):
+
+        if process.poll() is not None:
+            return
+
+        try:
+            os.killpg(
+                os.getpgid(process.pid),
+                signal.SIGTERM,
+            )
+        except ProcessLookupError:
+            return
+
+        try:
+            process.wait(timeout=0.5)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(
+                    os.getpgid(process.pid),
+                    signal.SIGKILL,
+                )
+            except ProcessLookupError:
+                pass
+
+    def _run(self, command, run_id):
 
         print()
         print(
@@ -254,13 +305,35 @@ class RecognitionService:
             " ".join(command),
         )
 
-        subprocess.run(
-            command,
-            cwd=PROJECT_ROOT,
-            check=True,
-        )
+        with self._lock:
 
-    def _process_recording(self):
+            self._ensure_current(run_id)
+
+            process = subprocess.Popen(
+                command,
+                cwd=PROJECT_ROOT,
+                start_new_session=True,
+            )
+
+            self._active_process = process
+
+        try:
+            return_code = process.wait()
+        finally:
+            with self._lock:
+
+                if self._active_process is process:
+                    self._active_process = None
+
+        self._ensure_current(run_id)
+
+        if return_code:
+            raise subprocess.CalledProcessError(
+                return_code,
+                command,
+            )
+
+    def _process_recording(self, run_id):
 
         try:
 
@@ -299,7 +372,7 @@ class RecognitionService:
                 ),
                 "--data",
                 str(spectrogram),
-            ])
+            ], run_id)
 
             # Peaks
             self._run([
@@ -316,7 +389,7 @@ class RecognitionService:
                 ),
                 "--output",
                 str(peaks),
-            ])
+            ], run_id)
 
             # Fingerprints
             self._run([
@@ -328,13 +401,16 @@ class RecognitionService:
                 str(peaks),
                 "--output",
                 str(fingerprints),
-            ])
+            ], run_id)
 
             result = self._match(
-                fingerprints
+                fingerprints,
+                run_id,
             )
 
             with self._lock:
+
+                self._ensure_current(run_id)
 
                 if result is None:
 
@@ -352,6 +428,10 @@ class RecognitionService:
 
                     self.result = result
 
+        except ExecutionCancelled:
+
+            print("[MATCH] Processing cancelled.")
+
         except Exception as exc:
 
             print(
@@ -360,6 +440,9 @@ class RecognitionService:
             )
 
             with self._lock:
+
+                if run_id != self._run_id:
+                    return
 
                 self.state = State.ERROR
                 self.error = str(exc)
@@ -371,6 +454,7 @@ class RecognitionService:
     def _match(
         self,
         fingerprint_path,
+        run_id,
     ):
 
         hashes, query_times = (
@@ -379,13 +463,20 @@ class RecognitionService:
             )
         )
 
-        votes, total_hits = (
+        self._ensure_current(run_id)
+
+        votes, _ = (
             lookup_matches(
                 DATABASE_PATH,
                 hashes,
                 query_times,
+                should_cancel=lambda: self._is_cancelled(
+                    run_id
+                ),
             )
         )
+
+        self._ensure_current(run_id)
 
         if not votes:
             return None
@@ -402,16 +493,12 @@ class RecognitionService:
             best_song_id,
         )
 
+        self._ensure_current(run_id)
+
         if song is None:
             return None
 
         title, artist, album, cover_file = song
-
-        confidence = (
-            100.0
-            * best_votes
-            / max(total_hits, 1)
-        )
 
         return {
             "song_id": best_song_id,
@@ -422,10 +509,6 @@ class RecognitionService:
             "votes": best_votes,
             "offset": round(
                 float(best_offset),
-                1,
-            ),
-            "confidence": round(
-                confidence,
                 1,
             ),
         }

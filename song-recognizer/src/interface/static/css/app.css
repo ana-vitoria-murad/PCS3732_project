@@ -4,7 +4,6 @@
     --light-gray: #eeeeee;
 
     --blue: #0865ff;
-    --yellow: #ffd400;
     --green: #28ef00;
     --red: #ff2b0a;
 }
@@ -201,13 +200,6 @@ body {
     top: 0;
 }
 
-.control.yellow {
-    background: var(--yellow);
-
-    left: 0;
-    top: 60px;
-}
-
 .control.green {
     background: var(--green);
 
@@ -247,10 +239,6 @@ body {
     background: var(--blue);
 }
 
-.yellow-dot {
-    background: var(--yellow);
-}
-
 .green-dot {
     background: var(--green);
 }
@@ -286,10 +274,6 @@ body {
 
 .status-recording {
     color: var(--blue);
-}
-
-.status-paused {
-    color: #d8ae00;
 }
 
 .status-processing {
@@ -427,4 +411,3 @@ footer p {
         grid-template-columns: 1fr;
     }
 }
-

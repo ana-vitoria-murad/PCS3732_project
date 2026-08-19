@@ -20,6 +20,7 @@ def lookup_matches(
     db_path,
     hashes,
     query_times,
+    should_cancel=None,
 ):
 
     conn = sqlite3.connect(db_path)
@@ -34,6 +35,9 @@ def lookup_matches(
         hashes,
         query_times,
     ):
+
+        if should_cancel is not None and should_cancel():
+            break
 
         cur.execute(
             """

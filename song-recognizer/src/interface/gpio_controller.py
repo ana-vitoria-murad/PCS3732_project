@@ -6,7 +6,6 @@ import pigpio
 
 
 BLUE_PIN = 20
-YELLOW_PIN = 26
 GREEN_PIN = 16
 RED_PIN = 21
 
@@ -38,7 +37,6 @@ class GPIOController:
 
         buttons = [
             BLUE_PIN,
-            YELLOW_PIN,
             GREEN_PIN,
             RED_PIN,
         ]
@@ -68,12 +66,6 @@ class GPIOController:
             ),
 
             self.pi.callback(
-                YELLOW_PIN,
-                pigpio.FALLING_EDGE,
-                self._button_callback,
-            ),
-
-            self.pi.callback(
                 GREEN_PIN,
                 pigpio.FALLING_EDGE,
                 self._button_callback,
@@ -88,7 +80,6 @@ class GPIOController:
 
         print("[GPIO] Buttons ready:")
         print(f"       BLUE   -> GPIO {BLUE_PIN}")
-        print(f"       YELLOW -> GPIO {YELLOW_PIN}")
         print(f"       GREEN  -> GPIO {GREEN_PIN}")
         print(f"       RED    -> GPIO {RED_PIN}")
 
@@ -107,21 +98,12 @@ class GPIOController:
 
             print(
                 "[GPIO] BLUE pressed "
-                "-> start/resume"
+                "-> start"
             )
 
             action = (
                 self.service.start_or_resume
             )
-
-        elif gpio == YELLOW_PIN:
-
-            print(
-                "[GPIO] YELLOW pressed "
-                "-> pause"
-            )
-
-            action = self.service.pause
 
         elif gpio == GREEN_PIN:
 
@@ -177,7 +159,6 @@ class GPIOController:
 
             for pin in [
                 BLUE_PIN,
-                YELLOW_PIN,
                 GREEN_PIN,
                 RED_PIN,
             ]:
