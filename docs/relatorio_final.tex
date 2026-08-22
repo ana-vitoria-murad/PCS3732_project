@@ -50,7 +50,7 @@
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 \newcommand{\codigo}[1]{\texttt{#1}}
 \newcommand{\caminho}[1]{\nolinkurl{#1}}
-\newcommand{\VideoFinalURL}{\href{https://drive.google.com/drive/folders/1zcMDBFCq20FDo9gOkV1ytAR7sOgkPn05?usp=sharing}{pasta da demonstração final no Google Drive}}
+\newcommand{\VideoFinalURL}{\href{https://drive.google.com/file/d/1d5mtTm5FeTt85H9Ikr7ll8yA03pNou9N/view?usp=drive_link}{vídeo da demonstração comparativa no Google Drive}}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -66,9 +66,7 @@
     \centering
     \textbf{UNIVERSIDADE DE SÃO PAULO}\\
     \textbf{ESCOLA POLITÉCNICA}\\
-    Departamento de Engenharia de Computação e Sistemas Digitais\\[1.2cm]
-
-    \includegraphics[width=3.1cm]{song-recognizer/src/interface/static/images/melody_logo.png}\\[0.8cm]
+    Departamento de Engenharia de Computação e Sistemas Digitais\\[2cm]
 
     {\Large\textbf{MELODY: RECONHECIMENTO DE MÚSICAS\\
     UTILIZANDO RASPBERRY PI 3}}\\[1.2cm]
@@ -383,11 +381,10 @@ exigir servidor separado \cite{sqlite2026}.
     \label{fig:arquitetura-software}
 \end{figure}
 
-O navegador consulta \codigo{/api/state} a cada 500 ms. Para uma única interface
-na rede local, esse \emph{polling} de duas requisições por segundo simplifica a
-sincronização e tem custo pequeno. Em uma evolução com mais clientes, eventos
-enviados pelo servidor (SSE) ou WebSocket evitariam consultas repetidas e
-reduziriam mensagens no terminal.
+A interface mantém a visualização sincronizada com o estado do serviço por meio
+da rota local \codigo{/api/state}. Como toda a comunicação ocorre na própria rede
+do protótipo, esse mecanismo não depende de serviços externos nem altera o
+caráter offline da solução.
 
 \subsection{Arquitetura comportamental}
 
@@ -498,11 +495,32 @@ probabilidade calibrada de acerto; sua exibição poderia induzir uma interpreta
 estatística incorreta. O cartão foi dimensionado para a tela do protótipo sem
 reduzir o espaçamento de identidade visual no cabeçalho.
 
+As duas páginas em execução no hardware utilizado durante a apresentação são
+mostradas na Figura~\ref{fig:interface-final}.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{docs/imagens/interface_inicial.jpeg}\\
+        \small (a) Página inicial.
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{docs/imagens/interface_reconhecimento.jpeg}\\
+        \small (b) Resultado do reconhecimento.
+    \end{minipage}
+    \caption{Interface final em execução na Raspberry Pi 3. Fonte: elaboração própria.}
+    \label{fig:interface-final}
+\end{figure}
+
 \section{Metodologia de desenvolvimento}
 
-Adotou-se desenvolvimento incremental durante quatro ciclos semanais. Cada ciclo
-produziu código executável, documentação no README e histórico no Git. O
-repositório público está disponível em
+Adotou-se desenvolvimento incremental durante quatro ciclos semanais, com código
+executável, documentação no README e histórico no Git. Não houve release na
+primeira semana; foram preparadas duas releases intermediárias e uma release
+final. O repositório público está disponível em
 \url{https://github.com/ana-vitoria-murad/PCS3732_project}.
 
 \begin{table}[H]
@@ -510,18 +528,18 @@ repositório público está disponível em
     \caption{Síntese dos incrementos.}
     \label{tab:incrementos}
     \small
-    \begin{tabularx}{\textwidth}{p{2.2cm} p{2.2cm} Y}
+    \begin{tabularx}{\textwidth}{C{2.6cm} p{2.4cm} Y}
         \toprule
-        \textbf{Data/release} & \textbf{Foco} & \textbf{Entrega principal}\\
+        \textbf{Ciclo} & \textbf{Foco} & \textbf{Entrega principal}\\
         \midrule
-        29/07, v0.1.0 & Base do sinal & Captura, inspeção de áudio, utilitários,
-        espectrograma e banco inicial.\\
-        05/08, v0.2.0 & Pipeline completo & Cadastro automático, novas músicas,
-        matching, resultados iniciais e documentação.\\
-        12/08, v0.3.0 & Integração & Interface web, protótipo visual, GPIO e
-        evidências em vídeo.\\
-        19/08, ciclo final & Robustez & Cancelamento imediato, ajustes visuais,
-        catálogo com 11 músicas e testes automatizados.\\
+        \shortstack{Semana 1\\sem release} & Estruturação & Captura, inspeção de áudio,
+        utilitários, espectrograma e banco inicial.\\
+        \shortstack{Semana 2\\v0.1.0} & Base funcional & Refinamento do processamento,
+        primeiros resultados e documentação.\\
+        \shortstack{Semana 3\\v0.2.0} & Pipeline completo & Cadastro automático, novas
+        músicas, matching e evidências experimentais.\\
+        \shortstack{Semana 4\\release final} & Integração e robustez & Interface web, GPIO,
+        cancelamento imediato, catálogo com 11 músicas e testes automatizados.\\
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -671,7 +689,9 @@ mesma composição.
     \item \href{https://drive.google.com/file/d/1dMfCgbtVWppEejYeSiKkwlpFuSDm9pZl/view?usp=drive_link}{reconhecimento inicial de \emph{I Can See You}};
     \item \href{https://drive.google.com/file/d/1rLpTn6fKmtMdpTGRO0p9CcuUjlkBJj4Z/view?usp=sharing}{reconhecimento de \emph{Faint} pela interface visual};
     \item \href{https://drive.google.com/file/d/1J5bIVzYEBFFINbpdiOmMa_muk8vZdySW/view?usp=sharing}{reconhecimento de \emph{I'm a Believer} pela interface visual}; e
-    \item demonstração comparativa de \emph{I'm a Believer}: \VideoFinalURL.
+    \item demonstração comparativa de \emph{I'm a Believer}, reunindo no mesmo
+    vídeo a gravação cadastrada, o cover e a versão de outro artista:
+    \VideoFinalURL.
 \end{itemize}
 
 \subsection{Situação final dos requisitos}
@@ -730,8 +750,8 @@ ser reconhecidas.
 Como trabalhos futuros, recomenda-se: coletar um conjunto maior de negativos
 reais; calibrar um limiar por número de votos, margem entre candidatos e quantidade
 de fingerprints; medir latência completa e consumo de recursos na Raspberry Pi;
-substituir o polling por SSE se houver múltiplos clientes; ampliar o catálogo; e
-avaliar parâmetros de picos em ambientes e posições de microfone variados.
+ampliar o catálogo; e avaliar parâmetros de picos em ambientes e posições de
+microfone variados.
 
 \clearpage
 \begin{thebibliography}{99}
@@ -782,10 +802,15 @@ Disponível em: \url{https://zenodo.org/records/1416340}. Acesso em: 21 ago. 202
 \section{Comandos de reprodução}
 
 Os comandos abaixo devem ser executados a partir da pasta
-\codigo{song-recognizer}, após ativar o ambiente virtual e instalar as
-dependências do projeto.
+\codigo{song-recognizer}. O ambiente virtual não faz parte da release: ele deve
+ser recriado a partir do arquivo \codigo{requirements.txt}.
 
 \begin{verbatim}
+# Preparação do ambiente
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+
 # Testes rápidos
 PYTHONPATH=src:. python -m unittest discover -s tests -v
 

@@ -185,6 +185,24 @@ As principais tecnologias utilizadas são:
 - Git;
 - GitHub.
 
+## Preparação do ambiente
+
+A pasta do ambiente virtual não é distribuída no repositório nem no ZIP da
+release, pois contém arquivos específicos da máquina. As dependências necessárias
+estão declaradas em `song-recognizer/requirements.txt` e o ambiente pode ser
+recriado com os comandos abaixo:
+
+```bash
+cd song-recognizer
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+O sistema também utiliza FFmpeg para conversão de áudio, ALSA/`arecord` para
+captura e o daemon `pigpiod` para acesso aos pinos GPIO. Esses componentes devem
+estar instalados no Raspberry Pi OS.
+
 ---
 
 # Organização da Implementação
@@ -329,7 +347,7 @@ Na interface e no GPIO, o azul inicia a gravação, o verde inicia o processamen
 
 ### Comparação de versões
 
-- [Demonstração de “I'm a Believer”: gravação cadastrada, cover e versão de outro artista](https://drive.google.com/drive/folders/1zcMDBFCq20FDo9gOkV1ytAR7sOgkPn05?usp=sharing)
+- [Demonstração de “I'm a Believer” em um único vídeo: gravação cadastrada, cover e versão de outro artista](https://drive.google.com/file/d/1d5mtTm5FeTt85H9Ikr7ll8yA03pNou9N/view?usp=drive_link)
 
 ---
 
