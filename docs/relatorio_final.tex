@@ -89,51 +89,6 @@
 
 \pagenumbering{roman}
 
-\section*{Resumo}
-\addcontentsline{toc}{section}{Resumo}
-
-Este trabalho apresenta o desenvolvimento do Melody, um reconhecedor de músicas
-executado localmente em uma Raspberry Pi 3 B+. O sistema grava oito segundos de
-áudio por um microfone USB, normaliza o sinal, calcula uma Transformada de Fourier
-de Curto Termo, seleciona máximos locais do espectrograma e produz impressões
-digitais acústicas a partir de pares de picos. Os hashes são comparados com um
-banco SQLite por votação de deslocamentos temporais. A solução inclui interface
-web local, controles físicos conectados aos pinos GPIO, cadastro automatizado de
-músicas e cancelamento imediato da execução. Ao final do projeto, o banco continha
-11 músicas e 300.057 fingerprints. Um benchmark determinístico avaliou 99 trechos
-de músicas cadastradas, incluindo áudio limpo, ruído e eco, e obteve 99 acertos.
-Em contraste, três sinais sintéticos desconhecidos não foram rejeitados, o que
-evidencia a necessidade de calibrar um limiar mínimo de aceitação. Na demonstração
-final, a gravação cadastrada de “I'm a Believer” foi reconhecida, enquanto uma
-versão cover e uma interpretação de outro artista não foram identificadas. Os
-resultados confirmam a viabilidade do processamento offline no hardware adotado,
-mas também delimitam o protótipo ao reconhecimento de gravações específicas.
-
-\noindent\textbf{Palavras-chave:} reconhecimento de músicas; impressão digital
-acústica; STFT; Raspberry Pi; sistemas embarcados.
-
-\section*{Abstract}
-\addcontentsline{toc}{section}{Abstract}
-
-This report presents Melody, an offline song-recognition system running on a
-Raspberry Pi 3 B+. The system records an eight-second audio excerpt through a USB
-microphone, preprocesses the signal, computes a Short-Time Fourier Transform,
-selects local spectrogram peaks, and creates acoustic fingerprints from peak
-pairs. The hashes are matched against a local SQLite database through temporal
-offset voting. The final prototype includes a local web interface, GPIO controls,
-automated song registration, and immediate execution cancellation. Its database
-contains 11 songs and 300,057 fingerprints. A deterministic benchmark evaluated
-99 registered-song excerpts under clean, noisy, and echo conditions and correctly
-identified all of them. However, none of three synthetic unknown signals was
-rejected, showing that a calibrated acceptance threshold is still required. In
-the final demonstration, the registered recording of “I'm a Believer” was
-recognized, whereas a cover and a version by another artist were not. The results
-support the feasibility of offline embedded recognition while confirming that the
-prototype identifies specific recordings rather than compositions in general.
-
-\noindent\textbf{Keywords:} song recognition; acoustic fingerprinting; STFT;
-Raspberry Pi; embedded systems.
-
 \tableofcontents
 \clearpage
 \pagenumbering{arabic}
