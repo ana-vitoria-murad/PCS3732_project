@@ -3,8 +3,13 @@
 ## Integrantes
 
 - Ana Vitória Abreu Murad
-- Andrey Rocha Reboredo 
+- Andrey Rocha Reboredo
 - Yasmin Francisquetti Barnes
+
+## Relatório final
+
+- [Código-fonte em LaTeX](docs/relatorio_final.tex)
+- [Relatório compilado em PDF](docs/relatorio_final.pdf)
 
 ---
 
@@ -14,9 +19,9 @@ O reconhecimento automático de músicas é uma tecnologia amplamente utilizada 
 
 Embora esses sistemas sejam bastante conhecidos, seu funcionamento envolve diversas áreas da Computação, como Processamento Digital de Sinais, Recuperação de Informação, Bancos de Dados e Sistemas Embarcados. Além disso, grande parte dessas soluções depende de infraestrutura em nuvem e grandes bases de dados centralizadas.
 
-Neste projeto será desenvolvida uma versão simplificada desse tipo de sistema, executada inteiramente em uma Raspberry Pi 3. O dispositivo será responsável por capturar um trecho de áudio através de um microfone, extrair características relevantes desse sinal e compará-las com um banco de dados previamente construído, permitindo identificar músicas previamente cadastradas sem a necessidade de conexão com a internet.
+Neste projeto foi desenvolvida uma versão simplificada desse tipo de sistema, executada inteiramente em uma Raspberry Pi 3. O dispositivo captura um trecho de áudio através de um microfone, extrai características relevantes desse sinal e as compara com um banco de dados previamente construído, permitindo identificar músicas cadastradas sem conexão com a internet.
 
-O desenvolvimento deste projeto permitirá aplicar conceitos estudados ao longo da disciplina, envolvendo tanto aspectos de hardware quanto de software, além de proporcionar experiência prática no desenvolvimento de aplicações para plataformas embarcadas.
+O desenvolvimento permitiu aplicar conceitos estudados ao longo da disciplina, envolvendo aspectos de hardware e software, além de proporcionar experiência prática com aplicações para plataformas embarcadas.
 
 ---
 
@@ -26,7 +31,7 @@ Nos últimos anos, dispositivos embarcados tornaram-se suficientemente capazes p
 
 Neste contexto, um sistema de reconhecimento de músicas representa um excelente estudo de caso, pois envolve diferentes etapas de processamento de dados, desde a aquisição do sinal até a tomada de decisão final.
 
-Além do aprendizado relacionado ao desenvolvimento para Raspberry Pi, o projeto permitirá compreender como sistemas de reconhecimento de padrões podem ser implementados utilizando técnicas eficientes de processamento de áudio. A proposta também incentiva a organização modular do software, o desenvolvimento incremental e a realização de testes experimentais para validação dos resultados obtidos.
+Além do aprendizado relacionado ao desenvolvimento para Raspberry Pi, o projeto permitiu compreender como sistemas de reconhecimento de padrões podem ser implementados utilizando técnicas eficientes de processamento de áudio. A organização modular do software, o desenvolvimento incremental e os testes experimentais também fizeram parte da validação dos resultados.
 
 ---
 
@@ -38,7 +43,7 @@ Desenvolver um sistema embarcado capaz de identificar músicas previamente cadas
 
 ## Objetivos Específicos
 
-Para atingir esse objetivo geral, o projeto será dividido em etapas menores, permitindo a implementação e validação gradual de cada componente do sistema.
+O objetivo geral foi dividido em etapas menores, permitindo a implementação e a validação gradual de cada componente do sistema.
 
 Os principais objetivos específicos são:
 
@@ -55,9 +60,9 @@ Os principais objetivos específicos são:
 
 # Escopo do Projeto
 
-O projeto será desenvolvido considerando um conjunto limitado de músicas previamente cadastradas em um banco de dados local. O objetivo não é competir com aplicações comerciais, mas compreender e implementar os principais conceitos envolvidos no reconhecimento automático de músicas.
+O projeto considera um conjunto limitado de músicas previamente cadastradas em um banco de dados local. O objetivo não é competir com aplicações comerciais, mas compreender e implementar os principais conceitos envolvidos no reconhecimento automático de músicas.
 
-Nesta primeira versão, o sistema será capaz de reconhecer apenas gravações originais presentes no banco de dados. A entrada será obtida através de um microfone conectado à Raspberry Pi enquanto uma música é reproduzida em outro dispositivo.
+Nesta primeira versão, o sistema reconhece a mesma gravação que foi cadastrada no banco de dados. A entrada é obtida através de um microfone conectado à Raspberry Pi enquanto uma música é reproduzida em outro dispositivo. Covers, canto, assobio e interpretações diferentes da mesma composição não fazem parte do escopo.
 
 Não fazem parte do escopo desta versão funcionalidades como reconhecimento por letra da música, reconhecimento de voz humana cantando, identificação de pessoas cantarolando (humming), consulta em serviços online ou sincronização com bancos de dados externos.
 
@@ -65,15 +70,15 @@ Não fazem parte do escopo desta versão funcionalidades como reconhecimento por
 
 # Funcionamento Geral do Sistema
 
-O funcionamento do sistema será dividido em diferentes etapas.
+O funcionamento do sistema é dividido em diferentes etapas.
 
-Inicialmente, um trecho de aproximadamente oito segundos será capturado pelo microfone. Em seguida, o sinal de áudio passará por um processo de pré-processamento para normalização e preparação dos dados.
+Inicialmente, um trecho de oito segundos é capturado pelo microfone. Em seguida, o sinal passa por pré-processamento para normalização e preparação dos dados.
 
-Posteriormente, serão extraídas características representativas do sinal, denominadas fingerprints acústicos. Essas informações serão comparadas com um banco de dados previamente construído contendo fingerprints de todas as músicas cadastradas.
+Posteriormente, são extraídas características representativas do sinal, denominadas fingerprints acústicos. Essas informações são comparadas com o banco local que contém os fingerprints das músicas cadastradas.
 
-Caso exista uma correspondência suficientemente forte entre o trecho capturado e alguma música do banco de dados, o sistema exibirá o título da música e, futuramente, também poderá apresentar o nome do artista e outras informações adicionais.
+Quando há hashes alinhados, o sistema apresenta título, artista, capa quando disponível e quantidade de votos do melhor agrupamento temporal.
 
-Caso contrário, o sistema informará que nenhuma música correspondente foi encontrada.
+Quando não ocorre nenhuma colisão de hashes, o sistema informa que a música não foi identificada. A rejeição geral de áudio desconhecido ainda possui a limitação descrita ao final deste documento.
 
 ---
 
@@ -110,7 +115,7 @@ A Tabela 1 apresenta os requisitos funcionais e não funcionais definidos para a
 | **RF05** | Funcional | O sistema deve comparar os fingerprints capturados com aqueles armazenados no banco de dados. | Executar uma consulta utilizando um trecho de uma música cadastrada e verificar se ocorre correspondência. |
 | **RF06** | Funcional | O sistema deve identificar e apresentar ao usuário o nome da música reconhecida. | Reproduzir uma música cadastrada e verificar se o sistema retorna corretamente seu título. |
 | **RF07** | Funcional | O sistema deve informar quando nenhuma música compatível for encontrada. | Reproduzir uma música inexistente no banco de dados e verificar se o sistema informa que não houve correspondência. |
-| **RF08** | Funcional | O sistema deve disponibilizar uma interface física por meio de botões conectados aos pinos GPIO da Raspberry Pi. | Pressionar o botão de reconhecimento e verificar se o sistema inicia a gravação, processa o trecho e apresenta o resultado automaticamente. |
+| **RF08** | Funcional | O sistema deve disponibilizar uma interface física por meio de botões conectados aos pinos GPIO da Raspberry Pi. | Verificar se o botão azul inicia a gravação, o verde inicia o processamento e o vermelho interrompe imediatamente a execução. |
 | **RNF01** | Não Funcional | O sistema deve operar integralmente de forma offline. | Desconectar a Raspberry Pi da internet e verificar o funcionamento normal do sistema. |
 | **RNF02** | Não Funcional | O reconhecimento deverá ocorrer em até 10 segundos após a captura do áudio. | Medir o tempo entre o término da gravação e a apresentação do resultado. |
 | **RNF03** | Não Funcional | O sistema deverá executar em uma Raspberry Pi 3 utilizando Raspberry Pi OS. | Implantar o software na Raspberry Pi e validar seu funcionamento. |
@@ -119,7 +124,7 @@ A Tabela 1 apresenta os requisitos funcionais e não funcionais definidos para a
 
 ---
 
-# Arquitetura Proposta
+# Arquitetura
 
 Para facilitar o desenvolvimento e a manutenção do software, o sistema foi dividido em módulos independentes. Cada módulo é responsável por uma etapa específica do processamento, permitindo testes isolados e integração gradual.
 
@@ -145,7 +150,7 @@ flowchart LR
     PEAK --> FP
     FP --> MATCH
     DB <--> MATCH
-    MATCH --> RES[Título, artista e métricas]
+    MATCH --> RES[Título, artista, capa e votos]
 ```
 
 O fluxo de cadastro processa a música completa e armazena seus fingerprints no banco local. No fluxo de reconhecimento, um trecho de aproximadamente oito segundos é capturado pelo microfone, processado da mesma forma e comparado com os hashes cadastrados. Os matches são agrupados pelo identificador da música e pelo deslocamento temporal entre o trecho consultado e a gravação de referência.
@@ -154,11 +159,11 @@ O fluxo de cadastro processa a música completa e armazena seus fingerprints no 
 
 # Tecnologias Utilizadas
 
-O desenvolvimento será realizado utilizando a linguagem Python devido à ampla disponibilidade de bibliotecas voltadas ao processamento de sinais e ao desenvolvimento para Raspberry Pi.
+O software foi desenvolvido em Python devido à ampla disponibilidade de bibliotecas voltadas ao processamento de sinais e ao desenvolvimento para Raspberry Pi.
 
-Como plataforma de hardware será utilizada uma Raspberry Pi 3 equipada com um microfone USB para aquisição do sinal de áudio.
+Como plataforma de hardware foi utilizada uma Raspberry Pi 3 equipada com um microfone USB para aquisição do sinal de áudio.
 
-As principais tecnologias previstas são:
+As principais tecnologias utilizadas são:
 
 ## Hardware
 
@@ -213,34 +218,110 @@ python src/recognize.py \
     --duration 8
 ```
 
+## Testes automatizados
+
+Os testes usam os arquivos WAV de referência e o banco de fingerprints já
+existentes. Eles não acessam o microfone e não alteram os arquivos de consulta,
+o banco de dados ou os gráficos do projeto.
+
+Execute a suíte rápida a partir da pasta `song-recognizer`:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+A suíte verifica o reconhecimento das onze músicas, o pré-processamento de
+silêncio, a repetibilidade do ruído sintético e o cancelamento imediato de um
+subprocesso. O teste de rejeição de áudio desconhecido está marcado como falha
+esperada enquanto o critério mínimo de aceitação de matches não for
+implementado.
+
+Para uma avaliação mais ampla, execute o benchmark:
+
+```bash
+python -m tests.benchmark_recognition
+```
+
+Por padrão, ele cria 99 casos: onze músicas, três posições por música e três
+condições (`clean`, `noise` e `echo`). O comando também relata o comportamento
+com ruído e tons sintéticos desconhecidos. Para fazer o benchmark encerrar com
+erro quando houver falsos positivos nesses casos, use:
+
+```bash
+python -m tests.benchmark_recognition --strict-unknown
+```
+
+Resultados detalhados podem ser exportados sem alterar os artefatos de
+produção:
+
+```bash
+python -m tests.benchmark_recognition \
+    --json-output benchmark-results.json
+```
+
 ---
 
-# Resultados dos Testes Iniciais
+# Resultados
+
+O banco final contém **11 músicas** e **300.057 fingerprints**. A suíte rápida
+executa seis testes: cinco são aprovados e um é mantido como falha esperada para
+documentar a limitação de rejeição de áudio desconhecido.
+
+O benchmark determinístico executa 99 casos de músicas cadastradas: onze
+músicas, três posições por música e três condições de áudio. Todos os casos de
+músicas cadastradas foram identificados corretamente.
+
+| Condição | Corretos | Tempo médio no ambiente de desenvolvimento | Votos médios |
+|---|---:|---:|---:|
+| Limpo | 33/33 | 0,124 s | 942,1 |
+| Ruído com SNR de 20 dB | 33/33 | 0,118 s | 716,5 |
+| Eco sintético | 33/33 | 0,118 s | 481,2 |
+| **Total** | **99/99** | — | — |
+
+Esses trechos são derivados digitalmente das referências e, portanto, o
+resultado não representa uma taxa de acerto universal para qualquer ambiente
+acústico. Os tempos também não incluem a captura pelo microfone e não substituem
+uma medição completa na Raspberry Pi.
+
+## Testes manuais iniciais
 
 Foram realizados testes de reconhecimento com trechos de aproximadamente oito segundos capturados durante a reprodução das músicas. As cinco músicas cadastradas foram identificadas corretamente.
 
-| Música | Resultado | Votos alinhados | Offset estimado | Confiança exibida |
-|---|:---:|---:|---:|---:|
-| I'm a Believer | Correto | 25 | 22,9 s | 35,7% |
-| I Think We're Alone Now | Correto | 3 | 60,5 s | 12,0% |
-| I Can See You | Correto | 31 | 167,9 s | 29,5% |
-| Espresso | Correto | 19 | 20,1 s | 78,0% |
-| One True Love | Correto | 3 | 30,7 s | 3,2% |
+| Música | Resultado | Votos alinhados | Offset estimado |
+|---|:---:|---:|---:|
+| I'm a Believer | Correto | 25 | 22,9 s |
+| I Think We're Alone Now | Correto | 3 | 60,5 s |
+| I Can See You | Correto | 31 | 167,9 s |
+| Espresso | Correto | 19 | 20,1 s |
+| One True Love | Correto | 3 | 30,7 s |
 
-A taxa de acerto observada nesse conjunto inicial foi de **5/5 músicas identificadas corretamente**. Entretanto, os valores de votos e confiança variaram de forma significativa. Em especial, `I Think We're Alone Now` e `One True Love` foram reconhecidas com apenas três votos alinhados, indicando menor margem de segurança diante de ruído, reverberação ou alterações na posição do microfone.
+A taxa de acerto observada nesse conjunto inicial foi de **5/5 músicas identificadas corretamente**. Entretanto, a quantidade de votos variou de forma significativa. Em especial, `I Think We're Alone Now` e `One True Love` foram reconhecidas com apenas três votos alinhados, indicando menor margem de segurança diante de ruído, reverberação ou alterações na posição do microfone.
 
-A métrica de confiança exibida pelo protótipo é calculada a partir da relação entre os votos do melhor agrupamento temporal e o total de ocorrências de hashes encontradas. Portanto, ela funciona como um indicador comparativo interno e **não deve ser interpretada como uma probabilidade estatística calibrada de acerto**.
+## Áudio desconhecido e versões diferentes
+
+O benchmark também inclui ruído branco, tom de 440 Hz e acorde sintético. Os
+três sinais produziram colisões esparsas de um ou dois votos e foram associados
+incorretamente a músicas do banco. Isso demonstra que o matcher ainda precisa de
+um limiar mínimo de aceitação.
+
+Na apresentação final, também foram comparadas três gravações de
+`I'm a Believer`: a gravação cadastrada, uma versão cover e uma interpretação de
+outro artista. Apenas a gravação cadastrada foi reconhecida, comportamento
+compatível com o escopo do projeto.
 
 ## Evidências em vídeo
 
 - [Vídeo de reconhecimento de “I Think We're Alone Now”](https://drive.google.com/file/d/1WVeXX_BBBwl9FQLqkDflyXSvk02ixFJV/view?usp=drive_link)
 - [Vídeo de reconhecimento de “I Can See You”](https://drive.google.com/file/d/1dMfCgbtVWppEejYeSiKkwlpFuSDm9pZl/view?usp=drive_link)
+- [Demonstração comparativa de “I'm a Believer”: gravação cadastrada, cover e versão de outro artista](https://drive.google.com/drive/folders/1zcMDBFCq20FDo9gOkV1ytAR7sOgkPn05?usp=sharing)
 
 ---
 
-## Interface Visual
+## Interface visual
 
-Nas últimas duas semanas de projeto, foi implementada a interface visual do projeto. A prototipação foi feita através da ferramenta Figma e em seguida implementada em HTML, .css e JavaScript. Foram feitas duas telas, uma como inicial, com informações sobre o projeto e a outra com a implementação da funcionalidade de reconhecimento musical. O protótipo das telas pode ser encontrado [nesse link](https://drive.google.com/drive/folders/1QI7yXe-QciUxqszAPm3iOHteYk10QRbw?usp=sharing).
+A interface foi prototipada no Figma e implementada em HTML, CSS e JavaScript. Ela possui uma página inicial com informações sobre o projeto e uma página de reconhecimento. O resultado apresenta título, artista, capa quando disponível e votos alinhados. Quando não existe capa, é exibido um quadro simples com uma nota musical.
+
+Na interface e no GPIO, o azul inicia a gravação, o verde inicia o processamento e o vermelho interrompe imediatamente a execução. O botão amarelo permanece visível, mas não executa nenhuma ação. O [protótipo das telas está disponível no Google Drive](https://drive.google.com/drive/folders/1QI7yXe-QciUxqszAPm3iOHteYk10QRbw?usp=sharing).
 
 ## Evidências em vídeo
 
@@ -249,7 +330,7 @@ Nas últimas duas semanas de projeto, foi implementada a interface visual do pro
 
 ---
 
-# Situação Atual dos Requisitos
+# Situação final dos requisitos
 
 | Requisito | Situação atual |
 |---|---|
@@ -258,24 +339,26 @@ Nas últimas duas semanas de projeto, foi implementada a interface visual do pro
 | RF03 — Fingerprints das músicas cadastradas | Implementado. |
 | RF04 — Fingerprints do trecho capturado | Implementado. |
 | RF05 — Comparação com o banco | Implementado por busca de hashes e votação de offsets. |
-| RF06 — Apresentação da música reconhecida | Implementado com título, artista e métricas. |
-| RF07 — Rejeição de música desconhecida | Não Implementado |
-| RF08 — Interface física por botões GPIO | Planejado. |
+| RF06 — Apresentação da música reconhecida | Implementado com título, artista, capa e votos alinhados. |
+| RF07 — Rejeição de música desconhecida | Parcialmente atendido: silêncio e versões musicais testadas são rejeitados, mas sinais sintéticos ainda podem gerar falsos positivos. |
+| RF08 — Interface física por botões GPIO | Implementado com azul para gravar, verde para processar e vermelho para interromper. |
 | RNF01 — Operação offline | Atendido pela arquitetura local. |
-| RNF02 — Resultado em até 10 segundos após a captura | Pendente de medição sistemática na Raspberry Pi 3. |
-| RNF03 — Execução na Raspberry Pi 3 | Pendente de validação final integrada no hardware. |
+| RNF02 — Resultado em até 10 segundos após a captura | Inconclusivo: ainda falta uma medição sistemática da cadeia completa na Raspberry Pi 3. |
+| RNF03 — Execução na Raspberry Pi 3 | Atendido e demonstrado no hardware durante a apresentação final. |
 | RNF04 — Inclusão sem alterar código-fonte | Implementado pelo script `add_song.py`. |
-| RNF05 — Modularidade, documentação e versionamento | Em andamento, com atualização para a segunda release. |
+| RNF05 — Modularidade, documentação e versionamento | Atendido qualitativamente por módulos separados, docstrings, testes automatizados e desenvolvimento incremental. |
 
 ---
 
-# Próximos Passos
+# Limitações conhecidas
 
-1. Ajustes finais;
-2. Testes automatizados.
+- O sistema reconhece gravações específicas cadastradas, não covers, canto, assobio ou outras interpretações da mesma composição.
+- O critério de rejeição de áudio desconhecido ainda precisa de um limiar calibrado para evitar matches baseados em poucas colisões.
+- O tempo completo entre o fim da captura e a apresentação do resultado ainda precisa ser medido sistematicamente na Raspberry Pi.
+- Os 99 casos automatizados usam trechos digitais das referências e não substituem testes em diferentes salas, distâncias e posições do microfone.
 
 ---
 
 # Licença
 
-Este projeto possui finalidade exclusivamente acadêmica e está sendo desenvolvido como parte da disciplina PCS3732 - Laboratório de Processadores.
+Este projeto possui finalidade exclusivamente acadêmica e foi desenvolvido como parte da disciplina PCS3732 - Laboratório de Processadores.

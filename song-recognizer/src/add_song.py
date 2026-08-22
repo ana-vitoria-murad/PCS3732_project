@@ -198,30 +198,47 @@ def insert_song(
                 "DELETE FROM fingerprints WHERE song_id = ?",
                 (existing_song_id,),
             )
+
             connection.execute(
-                "DELETE FROM songs WHERE id = ?",
-                (existing_song_id,),
+                """
+                UPDATE songs
+                SET title = ?,
+                    artist = ?,
+                    album = ?,
+                    cover_file = ?
+                WHERE id = ?
+                """,
+                (
+                    title,
+                    artist,
+                    album,
+                    cover_file,
+                    existing_song_id,
+                ),
             )
 
-        cursor = connection.execute(
-            """
-            INSERT INTO songs(
-                title,
-                artist,
-                album,
-                cover_file
-            )
-            VALUES (?, ?, ?, ?)
-            """,
-            (
-                title,
-                artist,
-                album,
-                cover_file,
-            ),
-        )
+            song_id = existing_song_id
 
-        song_id = int(cursor.lastrowid)
+        else:
+            cursor = connection.execute(
+                """
+                INSERT INTO songs(
+                    title,
+                    artist,
+                    album,
+                    cover_file
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    title,
+                    artist,
+                    album,
+                    cover_file,
+                ),
+            )
+
+            song_id = int(cursor.lastrowid)
 
         rows = [
             (

@@ -17,7 +17,7 @@
     >
 </head>
 
-<body>
+<body class="recognition-page">
 
 <header class="topbar">
 
@@ -44,13 +44,15 @@
             <button
                 class="control blue"
                 data-action="start"
-                aria-label="Iniciar ou continuar gravação"
+                aria-label="Iniciar gravação"
             ></button>
 
             <button
                 class="control yellow"
-                data-action="pause"
-                aria-label="Pausar gravação"
+                type="button"
+                aria-label="Pausar gravação (desativado)"
+                title="Pausa desativada"
+                disabled
             ></button>
 
             <button
@@ -68,31 +70,35 @@
         </div>
 
 
-        <div class="instructions">
+        <details class="instructions">
 
-            <h2>Instruções</h2>
+            <summary>Instruções</summary>
 
-            <p>
-                <span class="dot blue-dot"></span>
-                Iniciar / continuar gravação
-            </p>
+            <div class="instructions-list">
 
-            <p>
-                <span class="dot yellow-dot"></span>
-                Pausar gravação
-            </p>
+                <p>
+                    <span class="dot blue-dot"></span>
+                    Iniciar gravação
+                </p>
 
-            <p>
-                <span class="dot green-dot"></span>
-                Submeter gravação
-            </p>
+                <p>
+                    <span class="dot yellow-dot"></span>
+                    Pausa desativada
+                </p>
 
-            <p>
-                <span class="dot red-dot"></span>
-                Interromper execução
-            </p>
+                <p>
+                    <span class="dot green-dot"></span>
+                    Submeter gravação
+                </p>
 
-        </div>
+                <p>
+                    <span class="dot red-dot"></span>
+                    Interromper execução
+                </p>
+
+            </div>
+
+        </details>
 
     </section>
 
@@ -144,7 +150,6 @@
             <div class="match-details">
 
                 <span id="votes"></span>
-                <span id="confidence"></span>
 
             </div>
 

@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+    node distance=4.5mm and 9mm,
+    estado/.style={draw, rounded corners, align=center, minimum height=8mm,
+        minimum width=25mm, fill=blue!5},
+    decisao/.style={draw, diamond, aspect=2.4, align=center, fill=orange!8,
+        inner sep=1.5pt},
+    aviso/.style={draw=red!70!black, rounded corners, align=center,
+        minimum width=42mm, fill=red!4, text=red!70!black,
+        font=\scriptsize},
+    fluxo/.style={-{Latex[length=2mm]}, thick},
+    cancelar/.style={-{Latex[length=2mm]}, thick, red!70!black, dashed}
+]
+    \node[estado] (idle) {aguardando};
+    \node[estado, below=of idle] (recording) {gravação de 8 s};
+    \node[estado, below=of recording] (ready) {pronto};
+    \node[estado, below=of ready] (processing) {processamento};
+    \node[decisao, below=6mm of processing] (match) {há hashes alinhados?};
+    \node[estado, below left=6mm and 4mm of match] (matched) {música identificada};
+    \node[estado, below right=6mm and 4mm of match] (nomatch) {não identificada};
+    \node[aviso, right=20mm of processing] (cancel) {vermelho durante gravação ou processamento:\\
+        encerra o processo e retorna a aguardando};
+
+    \draw[fluxo] (idle) -- node[right, font=\scriptsize] {azul} (recording);
+    \draw[fluxo] (recording) -- (ready);
+    \draw[fluxo] (ready) -- node[right, font=\scriptsize] {verde} (processing);
+    \draw[fluxo] (processing) -- (match);
+    \draw[fluxo] (match) -- node[above left, font=\scriptsize] {sim} (matched);
+    \draw[fluxo] (match) -- node[above right, font=\scriptsize] {não} (nomatch);
+    \draw[cancelar] (recording.east) -| (cancel.north);
+    \draw[cancelar] (processing.east) -- (cancel.west);
+\end{tikzpicture}

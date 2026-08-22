@@ -1,0 +1,21 @@
+\begin{tikzpicture}[
+    node distance=8mm and 20mm,
+    bloco/.style={draw, rounded corners, align=center, minimum height=11mm,
+        minimum width=27mm, fill=blue!5},
+    perif/.style={draw, align=center, minimum height=10mm,
+        minimum width=24mm, fill=gray!8},
+    fluxo/.style={-{Latex[length=2mm]}, thick},
+    controle/.style={-{Latex[length=2mm]}, thick, dashed}
+]
+    \node[perif] (fonte) {dispositivo\\reprodutor};
+    \node[perif, right=of fonte] (microfone) {microfone\\USB};
+    \node[bloco, right=of microfone, minimum width=35mm,
+        minimum height=22mm] (raspberry) {Raspberry Pi 3 B+\\Raspberry Pi OS};
+    \node[perif, above=of raspberry] (botoes) {botões físicos\\GPIO};
+    \node[perif, right=of raspberry] (navegador) {tela com\\navegador};
+
+    \draw[fluxo] (fonte) -- node[above, font=\scriptsize, fill=white] {áudio} (microfone);
+    \draw[fluxo] (microfone) -- node[above, font=\scriptsize, fill=white] {PCM mono} (raspberry);
+    \draw[controle] (botoes) -- node[right, font=\scriptsize, fill=white] {20, 16 e 21} (raspberry);
+    \draw[fluxo] (raspberry) -- node[above, font=\scriptsize, fill=white] {HTTP local} (navegador);
+\end{tikzpicture}

@@ -107,16 +107,6 @@ def start():
     )
 
 
-@app.post("/api/action/pause")
-def pause():
-
-    service.pause()
-
-    return jsonify(
-        public_state()
-    )
-
-
 @app.post("/api/action/submit")
 def submit():
 

@@ -194,6 +194,16 @@ body {
     transform: scale(0.94);
 }
 
+.control:disabled {
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.control:disabled:hover,
+.control:disabled:active {
+    transform: none;
+}
+
 .control.blue {
     background: var(--blue);
 
@@ -223,15 +233,41 @@ body {
 }
 
 
-.instructions h2 {
-    margin-top: 0;
+.instructions {
+    position: relative;
 }
 
-.instructions p {
+.instructions summary {
+    padding: 0.7rem 1rem;
+
+    border: 1px solid var(--light-gray);
+    border-radius: 10px;
+
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.instructions-list {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 8px);
+    left: 0;
+
+    width: 240px;
+    padding: 0.65rem 1rem;
+
+    background: white;
+    border: 1px solid var(--light-gray);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgb(0 0 0 / 12%);
+}
+
+.instructions-list p {
     display: flex;
     align-items: center;
 
     gap: 12px;
+    margin: 0.65rem 0;
 }
 
 .dot {
@@ -288,10 +324,6 @@ body {
     color: var(--blue);
 }
 
-.status-paused {
-    color: #d8ae00;
-}
-
 .status-processing {
     color: var(--green);
 }
@@ -313,17 +345,17 @@ body {
     display: flex;
     align-items: center;
 
-    gap: 4rem;
+    gap: 3rem;
 
-    min-height: 300px;
+    min-height: 270px;
 
-    padding-bottom: 2rem;
+    padding-bottom: 1.5rem;
 }
 
 .cover,
 .cover-placeholder {
-    width: 255px;
-    height: 255px;
+    width: 225px;
+    height: 225px;
 
     border-radius: 18px;
 
@@ -339,16 +371,16 @@ body {
     align-items: center;
     justify-content: center;
 
-    font-size: 6rem;
+    font-size: 5rem;
 }
 
 .result-info h1 {
     margin: 0;
 
     font-size: clamp(
-        2.6rem,
-        5vw,
-        5rem
+        2.4rem,
+        4.5vw,
+        4.25rem
     );
 
     line-height: 1;
@@ -396,6 +428,10 @@ footer p {
         0.65rem 0;
 }
 
+.recognition-page footer {
+    margin-top: 0.75rem;
+}
+
 
 /* UTILITIES */
 
@@ -423,8 +459,12 @@ footer p {
         gap: 2rem;
     }
 
+    .instructions-list {
+        left: auto;
+        right: 0;
+    }
+
     footer {
         grid-template-columns: 1fr;
     }
 }
-

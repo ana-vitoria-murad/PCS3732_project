@@ -23,11 +23,6 @@ const votesElement =
         "votes"
     );
 
-const confidenceElement =
-    document.getElementById(
-        "confidence"
-    );
-
 const coverElement =
     document.getElementById(
         "cover"
@@ -49,11 +44,6 @@ const statuses = {
     recording: {
         text: "gravando...",
         className: "status-recording",
-    },
-
-    paused: {
-        text: "gravação pausada...",
-        className: "status-paused",
     },
 
     processing: {
@@ -164,10 +154,6 @@ function renderState(data) {
         votesElement.textContent =
             `${result.votes} votos`;
 
-        confidenceElement.textContent =
-            `${result.confidence}% confiança`;
-
-
         if (result.cover_url) {
 
             console.log(
@@ -200,6 +186,12 @@ function renderState(data) {
                 "hidden"
             );
         }
+
+    } else {
+
+        resultCard.classList.add(
+            "hidden"
+        );
     }
 }
 
@@ -230,4 +222,3 @@ setInterval(
     refreshState,
     500
 );
-
