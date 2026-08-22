@@ -309,14 +309,6 @@ Na apresentação final, também foram comparadas três gravações de
 outro artista. Apenas a gravação cadastrada foi reconhecida, comportamento
 compatível com o escopo do projeto.
 
-## Evidências em vídeo
-
-- [Vídeo de reconhecimento de “I Think We're Alone Now”](https://drive.google.com/file/d/1WVeXX_BBBwl9FQLqkDflyXSvk02ixFJV/view?usp=drive_link)
-- [Vídeo de reconhecimento de “I Can See You”](https://drive.google.com/file/d/1dMfCgbtVWppEejYeSiKkwlpFuSDm9pZl/view?usp=drive_link)
-- [Demonstração comparativa de “I'm a Believer”: gravação cadastrada, cover e versão de outro artista](https://drive.google.com/drive/folders/1zcMDBFCq20FDo9gOkV1ytAR7sOgkPn05?usp=sharing)
-
----
-
 ## Interface visual
 
 A interface foi prototipada no Figma e implementada em HTML, CSS e JavaScript. Ela possui uma página inicial com informações sobre o projeto e uma página de reconhecimento. O resultado apresenta título, artista, capa quando disponível e votos alinhados. Quando não existe capa, é exibido um quadro simples com uma nota musical.
@@ -325,8 +317,19 @@ Na interface e no GPIO, o azul inicia a gravação, o verde inicia o processamen
 
 ## Evidências em vídeo
 
-- [Vídeo do reconhecimento na Interface Visual de "Faint”](https://drive.google.com/file/d/1rLpTn6fKmtMdpTGRO0p9CcuUjlkBJj4Z/view?usp=sharing)
-- [Vídeo do reconhecimento na Interface Visual de “I'm a believer”](https://drive.google.com/file/d/1J5bIVzYEBFFINbpdiOmMa_muk8vZdySW/view?usp=sharing)
+### Reconhecimentos iniciais
+
+- [Reconhecimento de “I Think We're Alone Now”](https://drive.google.com/file/d/1WVeXX_BBBwl9FQLqkDflyXSvk02ixFJV/view?usp=drive_link)
+- [Reconhecimento de “I Can See You”](https://drive.google.com/file/d/1dMfCgbtVWppEejYeSiKkwlpFuSDm9pZl/view?usp=drive_link)
+
+### Interface visual integrada
+
+- [Reconhecimento de “Faint” pela interface visual](https://drive.google.com/file/d/1rLpTn6fKmtMdpTGRO0p9CcuUjlkBJj4Z/view?usp=sharing)
+- [Reconhecimento de “I'm a Believer” pela interface visual](https://drive.google.com/file/d/1J5bIVzYEBFFINbpdiOmMa_muk8vZdySW/view?usp=sharing)
+
+### Comparação de versões
+
+- [Demonstração de “I'm a Believer”: gravação cadastrada, cover e versão de outro artista](https://drive.google.com/drive/folders/1zcMDBFCq20FDo9gOkV1ytAR7sOgkPn05?usp=sharing)
 
 ---
 
