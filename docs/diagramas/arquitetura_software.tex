@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+    node distance=9mm and 19mm,
+    componente/.style={draw, rounded corners, align=center, minimum height=10mm,
+        minimum width=27mm, fill=blue!5},
+    dado/.style={draw, cylinder, shape border rotate=90, aspect=.25,
+        align=center, minimum height=12mm, minimum width=25mm, fill=green!7},
+    fluxo/.style={-{Latex[length=2mm]}, thick},
+    evento/.style={-{Latex[length=2mm]}, thick, dashed}
+]
+    \node[componente] (browser) {HTML/CSS/JS\\navegador};
+    \node[componente, right=of browser] (flask) {aplicação\\Flask};
+    \node[componente, above=of flask] (gpio) {controlador\\GPIO};
+    \node[componente, right=of flask] (service) {serviço de\\reconhecimento};
+    \node[componente, right=of service] (pipeline) {pipeline de áudio\\STFT--picos--hashes};
+    \node[dado, below=of pipeline] (db) {SQLite\\\texttt{songs.db}};
+    \node[dado, above=of pipeline] (arquivos) {WAV/NPZ\\temporários};
+
+    \draw[fluxo, <->] (browser) -- node[above, font=\scriptsize, fill=white] {HTTP/JSON} (flask);
+    \draw[fluxo, <->] (flask) -- (service);
+    \draw[evento] (gpio) -- node[above right, font=\scriptsize, fill=white] {eventos} (service);
+    \draw[fluxo, <->] (service) -- (pipeline);
+    \draw[fluxo, <->] (pipeline) -- (db);
+    \draw[fluxo, <->] (pipeline) -- (arquivos);
+\end{tikzpicture}
