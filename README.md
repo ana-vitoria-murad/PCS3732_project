@@ -377,9 +377,3 @@ Na interface e no GPIO, o azul inicia a gravação, o verde inicia o processamen
 - O critério de rejeição de áudio desconhecido ainda precisa de um limiar calibrado para evitar matches baseados em poucas colisões.
 - O tempo completo entre o fim da captura e a apresentação do resultado ainda precisa ser medido sistematicamente na Raspberry Pi.
 - Os 99 casos automatizados usam trechos digitais das referências e não substituem testes em diferentes salas, distâncias e posições do microfone.
-
----
-
-# Licença
-
-Este projeto possui finalidade exclusivamente acadêmica e foi desenvolvido como parte da disciplina PCS3732 - Laboratório de Processadores.
